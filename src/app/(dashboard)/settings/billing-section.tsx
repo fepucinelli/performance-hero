@@ -24,7 +24,8 @@ const PLANS: PlanOption[] = [
     price: 99,
     features: [
       "5 projetos",
-      "Monitoramento diário",
+      "Auditorias ilimitadas",
+      "Monitoramento diário automático",
       "Alertas por e-mail",
       "Histórico de 30 dias",
     ],
@@ -35,7 +36,8 @@ const PLANS: PlanOption[] = [
     price: 249,
     features: [
       "20 projetos",
-      "Monitoramento por hora",
+      "Auditorias ilimitadas",
+      "Monitoramento por hora automático",
       "Alertas e-mail + Slack",
       "Relatórios em PDF",
       "Histórico de 90 dias",
@@ -47,7 +49,8 @@ const PLANS: PlanOption[] = [
     price: 499,
     features: [
       "100 projetos",
-      "Monitoramento por hora",
+      "Auditorias ilimitadas",
+      "Monitoramento por hora automático",
       "Equipes e PDFs white-label",
       "Histórico de 1 ano",
     ],
@@ -144,7 +147,7 @@ export function BillingSection({ plan, hasStripeCustomer }: Props) {
                   </div>
                   {isCurrent && (
                     <Badge variant="secondary" className="text-xs">
-                      Current
+                      Atual
                     </Badge>
                   )}
                 </div>
