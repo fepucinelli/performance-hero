@@ -12,7 +12,12 @@ import {
   CartesianGrid,
 } from "recharts"
 import { THRESHOLDS } from "@/lib/utils/metrics"
-import { FlaskConical, Users } from "lucide-react"
+import { FlaskConical, Users, InfoIcon } from "lucide-react"
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface DataPoint {
   createdAt: Date
@@ -147,6 +152,17 @@ export function ScoreHistoryChart({ data }: Props) {
             <span className="flex items-center gap-1.5">
               <Users className="h-3 w-3" style={{ color: CRUX_COLOR }} />
               <span style={{ color: CRUX_COLOR }} className="font-medium">Usuários reais (P75)</span>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <button className="text-muted-foreground hover:text-foreground leading-none">
+                    <InfoIcon className="h-3 w-3" />
+                    <span className="sr-only">O que é P75?</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-xs">
+                  P75 (percentil 75) significa que 75% dos usuários reais tiveram um resultado igual ou melhor que este valor. É o padrão do Google para medir a experiência real dos visitantes.
+                </TooltipContent>
+              </UITooltip>
             </span>
           )}
         </div>

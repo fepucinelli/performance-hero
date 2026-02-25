@@ -78,6 +78,17 @@ export function MetricCard({ metric, value, fieldValue, className }: MetricCardP
         <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-medium">
           <Users className="h-3 w-3" />
           Usuários reais · P75
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="text-muted-foreground hover:text-foreground leading-none">
+                <InfoIcon className="h-3 w-3" />
+                <span className="sr-only">O que é P75?</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs text-xs">
+              P75 (percentil 75) significa que 75% dos usuários reais tiveram um resultado igual ou melhor que este valor. É o padrão do Google para medir a experiência real dos visitantes.
+            </TooltipContent>
+          </Tooltip>
         </p>
         {fieldValue !== null && fieldValue !== undefined ? (
           <MetricValue metric={metric} value={fieldValue} />
