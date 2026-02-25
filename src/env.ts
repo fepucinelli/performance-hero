@@ -53,7 +53,7 @@ export const env = createEnv({
     // Vercel Blob (Phase 3)
     BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
 
-    // Anthropic (Phase 4)
+    // Anthropic (Phase 2 — AI action plans)
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
   },
 

@@ -28,6 +28,7 @@ const PLANS: PlanOption[] = [
       "Monitoramento diário automático",
       "Alertas por e-mail",
       "Histórico de 30 dias",
+      "5 planos de ação por IA/mês",
     ],
   },
   {
@@ -41,6 +42,7 @@ const PLANS: PlanOption[] = [
       "Alertas e-mail + Slack",
       "Relatórios em PDF",
       "Histórico de 90 dias",
+      "30 planos de ação por IA/mês",
     ],
   },
   {
@@ -54,6 +56,7 @@ const PLANS: PlanOption[] = [
       "Alertas e-mail + Slack",
       "PDFs white-label",
       "Histórico de 1 ano",
+      "Planos de ação por IA ilimitados",
     ],
   },
 ]

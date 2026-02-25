@@ -22,6 +22,7 @@ import { AlertThresholds } from "@/components/projects/AlertThresholds"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
 import { getMonthlyRunCount } from "@/app/actions/projects"
 import type { Plan } from "@/lib/db/schema"
+import type { AIActionItem } from "@/types"
 
 export async function generateMetadata({
   params,
@@ -241,7 +242,10 @@ export default async function ProjectPage({
             <p className="text-muted-foreground mb-3 text-sm">
               Corrija esses problemas na ordem — do maior para o menor impacto.
             </p>
-            <ActionPlan lighthouseRaw={latestAudit.lighthouseRaw} />
+            <ActionPlan
+              lighthouseRaw={latestAudit.lighthouseRaw}
+              aiPlan={latestAudit.aiActionPlan as AIActionItem[] | null}
+            />
           </section>
 
           <Separator />

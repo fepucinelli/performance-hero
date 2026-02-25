@@ -70,7 +70,7 @@ See [`phase-1-mvp.md`](./phase-1-mvp.md) for detailed steps.
 
 ## Phase 2 — Pro
 
-**Goal:** Monetize. Scheduled monitoring, email alerts, and historical trend charts justify the subscription price.
+**Goal:** Monetize. Scheduled monitoring, email alerts, historical trend charts, and AI-powered action plans justify the subscription price.
 
 **Checklist:**
 - [x] Stripe integration (Starter R$99/month, Pro R$249/month, Agência R$499/month)
@@ -91,6 +91,13 @@ See [`phase-1-mvp.md`](./phase-1-mvp.md) for detailed steps.
   - [x] Regression detection (show when score dropped)
 - [x] Multi-project dashboard (card grid overview)
 - [x] Improved project settings page
+- [x] AI-powered action plans (Claude Haiku) — promoted from Phase 4
+  - [x] Tiered limits: Starter=5/mo, Pro=30/mo, Agency=unlimited
+  - [x] Stack auto-detection via Lighthouse stackPacks
+  - [x] All 5 CWV metrics in context (LCP, INP, CLS, FCP, TTFB)
+  - [x] PT-BR output for non-technical founders
+  - [x] Cached in audit_results.ai_action_plan (no regeneration cost)
+  - [x] Graceful fallback to static plan if API key missing or limit reached
 
 **Deliverable:** First paying customers. Goal: 10 paying customers by end of Phase 2.
 
@@ -145,10 +152,10 @@ See [`phase-3-agency.md`](./phase-3-agency.md) for detailed steps.
 - [ ] Competitor comparison
   - [ ] Compare your site vs competitor URL side-by-side
   - [ ] Available on Pro+
-- [ ] AI-powered action plans (Claude API)
-  - [ ] Instead of static explanations, generate personalized recommendations
-  - [ ] Context-aware: explain WHY the fix matters for their type of site
-  - [ ] Prompt includes audit JSON + site URL + business context
+- [x] AI-powered action plans (Claude API) → ✅ Promoted to Phase 2
+  - [x] Instead of static explanations, generate personalized recommendations
+  - [x] Context-aware: explain WHY the fix matters for their type of site
+  - [x] Prompt includes audit JSON + site URL + stack auto-detection
 - [ ] SEO score integration
   - [ ] Lighthouse SEO audit scores (already in Lighthouse, just surface them)
   - [ ] Combined "Site Health" score (performance + SEO + accessibility)

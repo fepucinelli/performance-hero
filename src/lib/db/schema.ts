@@ -148,6 +148,9 @@ export const auditResults = pgTable(
     // Access via: audit.lighthouseRaw as LighthouseResult
     lighthouseRaw: jsonb("lighthouse_raw"),
 
+    // AI-generated action plan (cached, null = not yet generated)
+    aiActionPlan: jsonb("ai_action_plan"),
+
     // Token for public share links (e.g. /share/abc123)
     shareToken: text("share_token")
       .notNull()

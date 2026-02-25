@@ -10,6 +10,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     pdfReports: false,
     slackAlerts: false,
     historyDays: 7,
+    aiActionPlansPerMonth: 0,
   },
   starter: {
     maxProjects: 5,
@@ -20,6 +21,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     pdfReports: false,
     slackAlerts: false,
     historyDays: 30,
+    aiActionPlansPerMonth: 5,
   },
   pro: {
     maxProjects: 20,
@@ -30,6 +32,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     pdfReports: true,
     slackAlerts: true,
     historyDays: 90,
+    aiActionPlansPerMonth: 30,
   },
   agency: {
     maxProjects: 100,
@@ -40,5 +43,6 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     pdfReports: true,
     slackAlerts: true,
     historyDays: 365,
+    aiActionPlansPerMonth: -1,
   },
 }

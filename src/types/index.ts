@@ -35,9 +35,21 @@ export interface PlanLimits {
   pdfReports: boolean
   slackAlerts: boolean
   historyDays: number
+  /** 0 = disabled, -1 = unlimited */
+  aiActionPlansPerMonth: number
 }
 
 export type PlanName = "free" | "starter" | "pro" | "agency"
+
+// ─── AI Action Plan ───────────────────────────────────────────────────────────
+
+export interface AIActionItem {
+  title: string
+  action: string
+  why: string
+  difficulty: "Fácil" | "Médio" | "Difícil"
+  stackTip?: string
+}
 
 // ─── PageSpeed Insights ───────────────────────────────────────────────────────
 
@@ -71,6 +83,7 @@ export interface LighthouseResult {
     "best-practices"?: { score: number }
   }
   audits: Record<string, LighthouseAudit>
+  stackPacks?: Array<{ id: string; title: string }>
 }
 
 export interface LighthouseAudit {

@@ -15,6 +15,7 @@ import { ActionPlan } from "@/components/metrics/ActionPlan"
 import { AuditList } from "@/components/metrics/AuditList"
 import { Globe, Zap } from "lucide-react"
 import { formatDate } from "@/lib/utils/date"
+import type { AIActionItem } from "@/types"
 
 // Cache shared reports for 5 minutes — they're immutable after creation
 export const revalidate = 300
@@ -142,7 +143,10 @@ export default async function SharePage({
           <p className="text-muted-foreground mb-3 text-sm">
             Problemas priorizados — corrija nessa ordem para o maior ganho de performance.
           </p>
-          <ActionPlan lighthouseRaw={audit.lighthouseRaw} />
+          <ActionPlan
+            lighthouseRaw={audit.lighthouseRaw}
+            aiPlan={audit.aiActionPlan as AIActionItem[] | null}
+          />
         </section>
 
         <Separator />

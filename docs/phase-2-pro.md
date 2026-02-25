@@ -405,6 +405,45 @@ Build `/pricing` with a comparison table:
 
 ---
 
+---
+
+## Track F — AI-Powered Action Plans
+
+Promoted from Phase 4. Claude Haiku generates personalized action plans for every audit on paid plans.
+
+### How it works
+
+1. After each audit result is saved, `maybeGenerateAIActionPlan()` checks the user's monthly quota
+2. If under quota, calls `generateAIActionPlan()` which hits Claude Haiku
+3. AI plan is stored in `audit_results.ai_action_plan` (JSONB) — cached forever, never regenerated
+4. UI renders AI plan with a "✨ Gerado por IA" badge; falls back to static plan if null
+
+### Tiered limits
+
+| Plan    | AI Plans/Month | Cost rationale |
+|---------|---------------|----------------|
+| Free    | 0 (disabled)  | No AI access   |
+| Starter | 5             | One per project per month |
+| Pro     | 30            | Daily cadence for ~20 projects |
+| Agency  | Unlimited     | R$499/mês — no limit |
+
+### Prompt design
+
+- **System:** Positions Claude as a CWV specialist targeting non-technical founders
+- **User context:** URL, perf score, detected stack (from `lighthouseRaw.stackPacks`), all 5 metrics (LCP, INP via CrUX, CLS, FCP, TTFB), top failing audit IDs
+- **Output:** PT-BR, 3–5 items, max 60 words each, JSON with `title`, `action`, `why`, `difficulty`, `stackTip`
+- **Model:** `claude-haiku-4-5-20251001` — fast and cheap (~$0.001/call)
+
+### Stack auto-detection
+
+Lighthouse's `stackPacks` field identifies Next.js, Nuxt, React, Vue, WordPress, Shopify, etc. automatically. No user input required. The prompt passes the detected stacks to Claude for stack-specific tips.
+
+### Error handling
+
+Any failure in AI generation is silently caught and ignored — the audit result is always saved first. Missing `ANTHROPIC_API_KEY` disables AI generation gracefully.
+
+---
+
 ## Definition of Done
 
 - [x] Stripe Checkout working end-to-end (test mode)

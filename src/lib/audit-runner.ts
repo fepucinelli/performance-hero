@@ -4,11 +4,13 @@
  * Called by both the manual audit route (/api/projects/[id]/audit)
  * and the scheduled job handler (/api/jobs/run-audit).
  */
-import { db, projects, auditResults } from "@/lib/db"
-import { eq } from "drizzle-orm"
+import { db, projects, auditResults, users } from "@/lib/db"
+import { eq, and, gte, isNotNull, count } from "drizzle-orm"
 import { runPSIAudit, PSIError } from "@/lib/api/pagespeed"
 import { gradeMetric } from "@/lib/utils/metrics"
 import { checkAndFireAlerts } from "@/lib/alerts"
+import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
+import { generateAIActionPlan } from "@/lib/ai/action-plan"
 import type { Strategy } from "@/lib/db/schema"
 
 export { PSIError }
@@ -70,5 +72,80 @@ export async function runAuditForProject(
     { id: result.id, lcp: result.lcp, cls: result.cls, inp: result.inp, triggeredBy: result.triggeredBy }
   )
 
+  // Generate AI action plan if user's plan allows it — fire-and-forget
+  try {
+    await maybeGenerateAIActionPlan(
+      result.id,
+      project.userId,
+      project.url,
+      {
+        perfScore: result.perfScore,
+        lcp: result.lcp,
+        cls: result.cls,
+        fcp: result.fcp,
+        ttfb: result.ttfb,
+        cruxInp: result.cruxInp,
+      },
+      auditData.lighthouseRaw
+    )
+  } catch {
+    // Never let AI generation failure affect the audit result
+  }
+
   return result.id
+}
+
+async function maybeGenerateAIActionPlan(
+  auditResultId: string,
+  userId: string,
+  url: string,
+  metrics: {
+    perfScore: number | null
+    lcp: number | null
+    cls: number | null
+    fcp: number | null
+    ttfb: number | null
+    cruxInp: number | null
+  },
+  lighthouseRaw: unknown
+): Promise<void> {
+  // Fetch user plan
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { plan: true },
+  })
+  const plan = dbUser?.plan ?? "free"
+  const planLimits = PLAN_LIMITS[plan]
+
+  if (planLimits.aiActionPlansPerMonth === 0) return
+
+  if (planLimits.aiActionPlansPerMonth !== -1) {
+    // Count AI plans generated this calendar month for this user
+    const monthStart = new Date()
+    monthStart.setUTCDate(1)
+    monthStart.setUTCHours(0, 0, 0, 0)
+
+    const [row] = await db
+      .select({ count: count() })
+      .from(auditResults)
+      .innerJoin(projects, eq(auditResults.projectId, projects.id))
+      .where(
+        and(
+          eq(projects.userId, userId),
+          gte(auditResults.createdAt, monthStart),
+          isNotNull(auditResults.aiActionPlan)
+        )
+      )
+
+    const usedThisMonth = row?.count ?? 0
+    if (usedThisMonth >= planLimits.aiActionPlansPerMonth) return
+  }
+
+  const aiPlan = await generateAIActionPlan(url, metrics, lighthouseRaw)
+  if (!aiPlan) return
+
+  await db
+    .update(auditResults)
+    .set({ aiActionPlan: aiPlan })
+    .where(eq(auditResults.id, auditResultId))
 }

@@ -116,6 +116,28 @@ Vercel Cron (daily/hourly)
 
 ---
 
+## AI: Claude API (Anthropic)
+
+**Model:** `claude-haiku-4-5-20251001` — fast and cost-effective for action plan generation.
+
+**What it does:**
+- Generates 3–5 personalized, PT-BR action plan items per audit
+- Detects tech stack from Lighthouse's built-in `stackPacks` (Next.js, WordPress, Vue, etc.)
+- Includes all 5 CWV metrics as context: LCP, INP (CrUX P75), CLS, FCP, TTFB
+- Output cached in `audit_results.ai_action_plan` (JSONB) — never regenerated for same audit
+
+**Tiered access (all paid plans):**
+- Free: 0 (static action plan only)
+- Starter: 5/month
+- Pro: 30/month
+- Agency: unlimited (-1)
+
+**Cost estimate:** Each call uses ~500-800 tokens total. At Haiku pricing (~$0.001/call), 1,000 AI plans/month ≈ $1. Negligible.
+
+**Error handling:** `ANTHROPIC_API_KEY` optional — if missing or any error occurs, falls back to static plan. AI generation never blocks audit save.
+
+---
+
 ## PDF Generation: @react-pdf/renderer
 
 **Why not Puppeteer/Playwright?**
@@ -305,7 +327,9 @@ A core differentiator. Every metric needs:
 3. **Your score** (contextual)
 4. **Top 3 actions** (specific to their audit result)
 
-Explanations are generated from the Lighthouse audit list. Each failed audit maps to an action item. This is static content (a lookup map), NOT LLM-generated (Phase 1). LLM-generated explanations are a Phase 4 feature (use Claude API to personalize action plans).
+Explanations are generated from the Lighthouse audit list. Each failed audit maps to an action item. This static lookup (`getActionPlan()`) is the fallback for free users and when AI generation fails.
+
+**Phase 2+:** Paid users get AI-powered plans from Claude Haiku (tiered limits). The static plan is always the fallback. See [AI: Claude API](#ai-claude-api-anthropic) section above.
 
 ---
 

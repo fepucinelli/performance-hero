@@ -195,6 +195,7 @@ export default function HomePage() {
                 <li>✓ 10 auditorias manuais/mês</li>
                 <li>✓ Relatório Lighthouse completo</li>
                 <li>✓ Links de compartilhamento</li>
+                <li>✓ Plano de ação estático</li>
               </ul>
               <Button className="w-full" asChild>
                 <Link href="/sign-up">Começar gratuitamente</Link>
@@ -217,6 +218,7 @@ export default function HomePage() {
                 <li>✓ Monitoramento diário automático</li>
                 <li>✓ Alertas por e-mail</li>
                 <li>✓ Histórico de 30 dias</li>
+                <li>✓ 5 planos de ação por IA/mês</li>
               </ul>
               <Button className="w-full" asChild>
                 <Link href="/sign-up">Começar período grátis</Link>
@@ -237,6 +239,7 @@ export default function HomePage() {
                 <li>✓ Alertas por e-mail + Slack</li>
                 <li>✓ Relatórios em PDF</li>
                 <li>✓ Histórico de 90 dias</li>
+                <li>✓ 30 planos de ação por IA/mês</li>
               </ul>
               <Button className="w-full" variant="outline" asChild>
                 <Link href="/sign-up">Começar período grátis</Link>
@@ -257,6 +260,7 @@ export default function HomePage() {
                 <li>✓ Alertas por e-mail + Slack</li>
                 <li>✓ PDFs white-label</li>
                 <li>✓ Histórico de 1 ano</li>
+                <li>✓ Planos de ação por IA ilimitados</li>
               </ul>
               <Button className="w-full" variant="outline" asChild>
                 <Link href="/sign-up">Começar período grátis</Link>
