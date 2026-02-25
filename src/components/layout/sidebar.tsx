@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FolderOpen, Settings, BarChart3 } from "lucide-react"
+import { LayoutDashboard, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -10,16 +10,6 @@ const navItems = [
     href: "/dashboard",
     label: "Painel",
     icon: LayoutDashboard,
-  },
-  {
-    href: "/projects",
-    label: "Projetos",
-    icon: FolderOpen,
-  },
-  {
-    href: "/reports",
-    label: "Relatórios",
-    icon: BarChart3,
   },
   {
     href: "/settings",
