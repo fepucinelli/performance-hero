@@ -1,4 +1,4 @@
-# Performance Radar
+# PerfAlly
 
 > "Core Web Vitals para founders, não para engenheiros."
 
@@ -8,7 +8,7 @@ A SaaS for web performance monitoring targeting small businesses and agencies. E
 
 ## What It Is
 
-Most small companies don't know what Core Web Vitals are, or can't configure enterprise tools like Datadog, SpeedCurve, or Calibre. Performance Radar fills the gap: opinionated, simple, and actionable.
+Most small companies don't know what Core Web Vitals are, or can't configure enterprise tools like Datadog, SpeedCurve, or Calibre. PerfAlly fills the gap: opinionated, simple, and actionable.
 
 **Key differentiators:**
 - No jargon — every metric explained in plain language
@@ -121,7 +121,7 @@ performance-radar/
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/performance-radar.git
+git clone https://github.com/fepucinelli/performance-radar.git
 cd performance-radar
 pnpm install
 ```
@@ -193,6 +193,9 @@ Copy the webhook signing secret printed by the CLI into `STRIPE_WEBHOOK_SECRET` 
 - **Tailwind CSS v4** — CSS-based config via `@import "tailwindcss"` in `globals.css`. No `tailwind.config.ts`.
 - **`proxy.ts` for Clerk** — Next.js 16 uses `proxy.ts` (not `middleware.ts`) for edge middleware.
 - **`noUncheckedIndexedAccess: true`** — Array accesses return `T | undefined`. Use optional chaining throughout.
+- **CrUX field shape** — The PSI API returns CrUX P75 values as a flat integer under the key `percentile`, not `percentiles.p75`. CLS is stored ×100 in CrUX (e.g. `10` → `0.10`) and must be divided before storing. `originLoadingExperience` is used as a fallback when page-level `loadingExperience` metrics are absent.
+- **INP has no lab value** — Lighthouse cannot measure INP without real user interactions. `inp` is always `null` from lab data; only `cruxInp` from CrUX carries a real value.
+- **Authenticated root redirect** — The Clerk middleware (`proxy.ts`) redirects logged-in users from `/` to `/dashboard` at the edge.
 
 ---
 

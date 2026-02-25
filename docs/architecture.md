@@ -19,7 +19,7 @@ GET https://www.googleapis.com/pagespeedonline/v5/runPagespeed
 
 One call returns:
 - **`lighthouseResult`** — Lab data: LCP, CLS, INP, FCP, TTFB, Total Blocking Time, Speed Index, full audit list
-- **`loadingExperience`** — CrUX field data: real user P75 values for LCP, CLS, INP, FCP
+- **`loadingExperience`** — Page-level CrUX P75 values for LCP, CLS, INP, FCP. Falls back to **`originLoadingExperience`** (origin-level) when page metrics are absent.
 
 **Why not run Lighthouse directly?**
 Running Lighthouse CLI on Vercel is impractical (no headless Chrome, cold start time).
@@ -31,7 +31,13 @@ PSI API is free (25,000 req/day with API key), gives both data sources in one ca
 - Results are cached by Google for ~30 seconds to 1 minute
 - Some URLs aren't in CrUX (low-traffic sites) — handle gracefully with a lab-data-only fallback
 - Does not support authenticated pages or SPAs that require interaction
+- INP has no Lighthouse lab value — it requires real user interactions. `cruxInp` is the only source of INP data.
 
+
+**CrUX API shape (important gotcha):**
+- P75 values live at `metrics.METRIC_NAME.percentile` (flat integer) — NOT `percentiles.p75`
+- `CUMULATIVE_LAYOUT_SHIFT_SCORE` is stored ×100 (e.g. `10` = CLS `0.10`) — divide by 100 before grading/display
+- Always read `originLoadingExperience` as fallback when `loadingExperience.metrics` is empty
 **Future consideration (Phase 5):** Run actual Lighthouse via a long-running worker (Fly.io, Railway) for custom audits, authentication support, and multi-step flows.
 
 ### CrUX History API (Phase 4)
@@ -76,7 +82,7 @@ For a SaaS project:
 **Clerk setup pattern:**
 ```
 ClerkProvider (root layout)
-  → middleware.ts protects (dashboard) routes
+  → proxy.ts protects (dashboard) routes and redirects authenticated users from / to /dashboard
   → webhook /api/webhooks/clerk syncs user to DB
 ```
 
@@ -197,6 +203,8 @@ Google's official thresholds (as of 2025):
 | FCP    | ≤ 1.8s   | 1.8s – 3.0s       | > 3.0s  |
 | TTFB   | ≤ 800ms  | 800ms – 1800ms    | > 1800ms|
 
+
+**Note:** INP replaces FID as a Core Web Vital. Lighthouse lab data cannot produce an INP value — only CrUX field data provides it.
 **Performance Score mapping** (Lighthouse composite):
 - 90–100: Good (green)
 - 50–89: Needs Improvement (orange)

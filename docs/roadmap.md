@@ -7,9 +7,9 @@ Each phase is designed to be independently shippable and generate value. Ship Ph
 ## Phase Overview
 
 ```
-Phase 0 — Foundation        (Week 1–2)    Infrastructure, scaffold, CI/CD
-Phase 1 — MVP               (Week 3–5)    Core product, free tier live
-Phase 2 — Pro               (Week 6–8)    Paid subscriptions, alerts, history
+Phase 0 — Foundation ✅     (Week 1–2)    Infrastructure, scaffold, CI/CD
+Phase 1 — MVP ✅            (Week 3–5)    Core product, free tier live
+Phase 2 — Pro ✅            (Week 6–8)    Paid subscriptions, alerts, history
 Phase 3 — Agency            (Week 9–12)   PDF reports, teams, white-label
 Phase 4 — Growth            (Month 4–6)   Integrations, AI explanations, SEO
 Phase 5 — Scale             (Month 6+)    API, plugins, advanced auditing
@@ -22,15 +22,15 @@ Phase 5 — Scale             (Month 6+)    API, plugins, advanced auditing
 **Goal:** Working Next.js app deployed to Vercel, with auth, DB, and CI/CD in place. No product features yet.
 
 **Checklist:**
-- [ ] Init Next.js 15 with TypeScript, Tailwind, shadcn/ui
-- [ ] Configure Clerk (auth middleware, sign-in/sign-up pages)
-- [ ] Set up Neon PostgreSQL + Drizzle ORM
-- [ ] Create initial DB schema (users, projects, audit_results)
-- [ ] Deploy to Vercel (production + preview envs)
-- [ ] Set up Sentry for error tracking
-- [ ] `.env.example` with all required variables documented
-- [ ] Basic landing page (can be placeholder)
-- [ ] Protected dashboard skeleton (just the layout, no data)
+- [x] Init Next.js 16.1.6 with TypeScript, Tailwind, shadcn/ui
+- [x] Configure Clerk (auth middleware, sign-in/sign-up pages)
+- [x] Set up Neon PostgreSQL + Drizzle ORM
+- [x] Create initial DB schema (users, projects, audit_results)
+- [x] Deploy to Vercel (production + preview envs)
+- [x] Set up Sentry for error tracking
+- [x] `.env.example` with all required variables documented
+- [x] Basic landing page (can be placeholder)
+- [x] Protected dashboard skeleton (just the layout, no data)
 
 **Deliverable:** A deployed app where you can sign up, sign in, and see an empty dashboard.
 
@@ -43,22 +43,22 @@ See [`phase-0-foundation.md`](./phase-0-foundation.md) for detailed steps.
 **Goal:** A founder can plug in a URL, run a Lighthouse audit, and get a plain-English report. Free tier: 1 project, 10 manual runs.
 
 **Checklist:**
-- [ ] URL input form with validation
-- [ ] PSI API integration (mobile + desktop strategy)
-- [ ] Parse and store audit results in DB
-- [ ] Metric cards: LCP, INP, CLS, FCP, TTFB with color grading
-- [ ] Plain-English explanation for each metric
-- [ ] Action Plan section: top 5 prioritized issues from audit
-- [ ] Lighthouse audit list (collapsible, full detail available)
-- [ ] CrUX field data display (with fallback if not available)
-- [ ] Project list page
-- [ ] Single project view with latest audit
-- [ ] Free plan enforcement (1 project, 10 runs/month)
-- [ ] "Share" link for public audit results (no auth required to view)
+- [x] URL input form with validation
+- [x] PSI API integration (mobile + desktop strategy)
+- [x] Parse and store audit results in DB
+- [x] Metric cards: LCP, INP, CLS, FCP, TTFB with color grading
+- [x] Plain-English explanation for each metric
+- [x] Action Plan section: top 5 prioritized issues from audit
+- [x] Lighthouse audit list (collapsible, full detail available)
+- [x] CrUX field data display (with fallback if not available)
+- [x] Project list page
+- [x] Single project view with latest audit
+- [x] Free plan enforcement (1 project, 10 runs/month)
+- [x] "Share" link for public audit results (no auth required to view)
 
 **Nice to have (if time allows):**
-- [ ] Mobile vs Desktop toggle
-- [ ] Keyboard shortcut to re-run audit
+- [x] Mobile vs Desktop toggle
+- [x] Keyboard shortcut to re-run audit
 
 **Deliverable:** A publicly accessible product. Post on X/HN/Indie Hackers. Start collecting waitlist emails.
 
@@ -73,24 +73,24 @@ See [`phase-1-mvp.md`](./phase-1-mvp.md) for detailed steps.
 **Goal:** Monetize. Scheduled monitoring, email alerts, and historical trend charts justify the subscription price.
 
 **Checklist:**
-- [ ] Stripe integration (Starter $19/month, Pro $49/month)
-- [ ] Stripe Customer Portal (self-service subscription management)
-- [ ] Upgrade/downgrade flow from dashboard
-- [ ] Plan enforcement gates on dashboard (upgrade prompts)
-- [ ] Scheduled audits via Vercel Cron + QStash
-  - [ ] Projects have `schedule` field (manual | daily | hourly)
-  - [ ] Cron trigger runs every hour, fans out to QStash jobs
-  - [ ] Each job: calls PSI, stores result, checks alert conditions
-- [ ] Email alerts (via Resend) when metrics degrade past threshold
-  - [ ] Per-metric thresholds configurable per project
-  - [ ] Alert history in dashboard
-  - [ ] Unsubscribe/mute support
-- [ ] Historical trend charts (last 30 days by default)
-  - [ ] Line chart: performance score over time
-  - [ ] Line chart: each CWV over time
-  - [ ] Regression detection (show when score dropped)
-- [ ] Multi-project dashboard (card grid overview)
-- [ ] Improved project settings page
+- [x] Stripe integration (Starter R$99/month, Pro R$249/month, Agência R$499/month)
+- [x] Stripe Customer Portal (self-service subscription management)
+- [x] Upgrade/downgrade flow from dashboard
+- [x] Plan enforcement gates on dashboard (upgrade prompts)
+- [x] Scheduled audits via Vercel Cron + QStash
+  - [x] Projects have `schedule` field (manual | daily | hourly)
+  - [x] Cron trigger runs every hour, fans out to QStash jobs
+  - [x] Each job: calls PSI, stores result, checks alert conditions
+- [x] Email alerts (via Resend) when metrics degrade past threshold
+  - [x] Per-metric thresholds configurable per project
+  - [x] Alert history in dashboard
+  - [x] Unsubscribe/mute support
+- [x] Historical trend charts (last 30 days by default)
+  - [x] Line chart: performance score over time
+  - [x] Line chart: each CWV over time
+  - [x] Regression detection (show when score dropped)
+- [x] Multi-project dashboard (card grid overview)
+- [x] Improved project settings page
 
 **Deliverable:** First paying customers. Goal: 10 paying customers by end of Phase 2.
 
@@ -107,7 +107,7 @@ See [`phase-2-pro.md`](./phase-2-pro.md) for detailed steps.
 **Checklist:**
 - [ ] Agency plan ($99/month, 100 projects)
 - [ ] PDF report generation (@react-pdf/renderer)
-  - [ ] Branded Performance Radar header
+  - [ ] Branded PerfAlly header
   - [ ] Executive summary (score, grade, key findings)
   - [ ] Per-metric section with explanation + recommendations
   - [ ] Action plan table
@@ -141,7 +141,7 @@ See [`phase-3-agency.md`](./phase-3-agency.md) for detailed steps.
 - [ ] Webhook notifications (custom HTTP endpoint)
 - [ ] Public performance badge (embeddable `<img>` showing current score)
   - [ ] `GET /api/badge/{projectId}` returns SVG
-  - [ ] Powers product virality — badge links back to Performance Radar
+  - [ ] Powers product virality — badge links back to PerfAlly
 - [ ] Competitor comparison
   - [ ] Compare your site vs competitor URL side-by-side
   - [ ] Available on Pro+
@@ -168,7 +168,7 @@ See [`phase-4-growth.md`](./phase-4-growth.md) for detailed steps.
 
 ## Phase 5 — Scale
 
-**Goal:** Build the ecosystem around Performance Radar. Developer-friendly features and platform integrations.
+**Goal:** Build the ecosystem around PerfAlly. Developer-friendly features and platform integrations.
 
 **Checklist:**
 - [ ] Public REST API
@@ -220,9 +220,9 @@ White-label the audit engine. Charge per-call for developers who want Lighthouse
 Weekly email: "Here's how your site changed vs last week." Personalized, automated, no dashboard needed. Converts free users who don't log in.
 
 ### Vertical SaaS editions (Phase 5+)
-- Performance Radar for Shopify (connect store, auto-detect product/checkout pages)
-- Performance Radar for WordPress (plugin-based, auto-discover posts)
-- Performance Radar for Next.js (GitHub integration, per-route tracking)
+- PerfAlly for Shopify (connect store, auto-detect product/checkout pages)
+- PerfAlly for WordPress (plugin-based, auto-discover posts)
+- PerfAlly for Next.js (GitHub integration, per-route tracking)
 
 ---
 
@@ -233,11 +233,11 @@ Weekly email: "Here's how your site changed vs last week." Personalized, automat
 
 **Phase 2:**
 - Free: 1 project, 10 runs/month
-- Starter $19: 5 projects, daily monitoring, email alerts
-- Pro $49: 20 projects, hourly monitoring, all alerts
+- Starter R$99: 5 projects, daily monitoring, email alerts
+- Pro R$249: 20 projects, hourly monitoring, all alerts
 
 **Phase 3:**
-- Add Agency $99: 100 projects, teams, PDF reports, white-label
+- Add Agência R$499: 100 projects, teams, PDF reports, white-label
 
 **Phase 4+:**
 - Consider annual pricing (2 months free = 17% discount)

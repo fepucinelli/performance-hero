@@ -16,7 +16,7 @@ An embeddable SVG badge showing current performance score:
 
 ```
 ┌──────────────────────────────────┐
-│  ⚡ Performance Radar            │
+│  ⚡ PerfAlly            │
 │  mysite.com    ■■■■□□  72/100   │
 └──────────────────────────────────┘
 ```
@@ -55,7 +55,7 @@ Embed code shown in dashboard:
 </a>
 ```
 
-Virality mechanism: every badge click leads back to Performance Radar with a "Check your site free" CTA.
+Virality mechanism: every badge click leads back to PerfAlly with a "Check your site free" CTA.
 
 #### 2. "One-time Report" Landing Page
 
@@ -312,8 +312,8 @@ Phase 4 is also when you should invest in content:
    - `/tools/cwv-calculator` — explains what your score means
 
 3. **Comparison pages** (convert from competitors):
-   - "Performance Radar vs Google Search Console"
-   - "Performance Radar vs PageSpeed Insights"
+   - "PerfAlly vs Google Search Console"
+   - "PerfAlly vs PageSpeed Insights"
 
 ---
 

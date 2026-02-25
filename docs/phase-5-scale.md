@@ -16,7 +16,7 @@ Phase 5 isn't a single sprint — it's a set of independent features you can shi
 
 ### 1. Public REST API
 
-Opens Performance Radar to developers and B2B integrations.
+Opens PerfAlly to developers and B2B integrations.
 
 **Endpoint design:**
 ```
@@ -67,7 +67,7 @@ The action:
 
 **PR comment example:**
 ```
-⚡ Performance Radar
+⚡ PerfAlly
 
                  This PR    Base     Diff
 Performance      78         85       ▼ -7 pts
@@ -92,7 +92,7 @@ Connect with Vercel, Netlify, Render, Fly.io — auto-trigger audits on deploy:
 ```
 
 **Vercel integration setup:**
-1. User installs Performance Radar integration from Vercel Marketplace (or manual webhook)
+1. User installs PerfAlly integration from Vercel Marketplace (or manual webhook)
 2. On each production deploy, Vercel POSTs to our webhook
 3. We extract the deploy URL, run audit, store as `triggered_by: "deploy"`
 4. Email if regression detected
@@ -209,11 +209,11 @@ API access is available on Pro+ plan (included in subscription). Consider:
 
 ## Platform / Marketplace Vision
 
-Long-term (12–18 months), Performance Radar becomes a platform:
+Long-term (12–18 months), PerfAlly becomes a platform:
 
 1. **Plugin ecosystem:** Third-party integrations (Shopify app, WooCommerce extension, Webflow plugin)
 2. **Audit templates:** Pre-configured audit profiles for e-commerce, SaaS, blogs
-3. **Reseller program:** Agencies resell Performance Radar under their brand (already enabled by white-label)
+3. **Reseller program:** Agencies resell PerfAlly under their brand (already enabled by white-label)
 4. **Data insights:** Aggregated, anonymized benchmarks by industry ("How does your e-commerce site compare to others?")
 
 ---

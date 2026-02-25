@@ -1,8 +1,7 @@
 # Phase 2 — Pro
 
 **Goal:** Monetize. First paying customers. Scheduled monitoring + alerts + historical data.
-**Duration:** 2–3 weeks
-**Depends on:** Phase 1 shipped and validated (some real users)
+**Status:** ✅ Complete
 
 ---
 
@@ -25,13 +24,15 @@ pnpm add stripe @stripe/stripe-js
 ```
 
 **Products to create in Stripe:**
-- Product: "Performance Radar Starter" — $19/month
-- Product: "Performance Radar Pro" — $49/month
+- Product: "Performance Radar Starter" — R$99/month
+- Product: "Performance Radar Pro" — R$249/month
+- Product: "Performance Radar Agência" — R$499/month
 
 Store Price IDs in env:
 ```
 STRIPE_STARTER_PRICE_ID=price_xxx
 STRIPE_PRO_PRICE_ID=price_xxx
+STRIPE_AGENCY_PRICE_ID=price_xxx
 ```
 
 **Stripe client:**
@@ -39,7 +40,7 @@ STRIPE_PRO_PRICE_ID=price_xxx
 // src/lib/api/stripe.ts
 import Stripe from "stripe"
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2026-01-28.clover",
 })
 ```
 
@@ -327,9 +328,12 @@ const history = await db.query.auditResults.findMany({
   limit: 30,
   columns: {
     id: true, createdAt: true, perfScore: true,
-    lcp: true, cls: true, inp: true,
+    lcp: true, cls: true, inp: true, fcp: true,
+    cruxLcp: true, cruxCls: true, cruxInp: true, cruxFcp: true,
   }
 })
+
+Chart tabs: Pontuação, LCP, FCP, CLS, INP. Each tab shows two lines — blue solid (Lighthouse lab) and violet dashed (CrUX real users P75). Custom tooltip always renders both lines even when CrUX data is null.
 ```
 
 **Chart component:**
@@ -403,12 +407,12 @@ Build `/pricing` with a comparison table:
 
 ## Definition of Done
 
-- [ ] Stripe Checkout working end-to-end (test mode)
-- [ ] Subscription status persisted in DB
-- [ ] Downgrade flow tested (subscription cancelled → plan reverts to free)
-- [ ] Cron job running on Vercel and triggering QStash jobs
-- [ ] Audit jobs running automatically for scheduled projects
-- [ ] Alert emails sending when thresholds exceeded
-- [ ] Historical chart rendering with real data
-- [ ] Upgrade prompts shown when limits hit
-- [ ] First paid customer (even if a friend — validate the checkout)
+- [x] Stripe Checkout working end-to-end (test mode)
+- [x] Subscription status persisted in DB
+- [x] Downgrade flow tested (subscription cancelled → plan reverts to free)
+- [x] Cron job running on Vercel and triggering QStash jobs
+- [x] Audit jobs running automatically for scheduled projects
+- [x] Alert emails sending when thresholds exceeded
+- [x] Historical chart rendering with real data
+- [x] Upgrade prompts shown when limits hit
+- [x] First paid customer (even if a friend — validate the checkout)
