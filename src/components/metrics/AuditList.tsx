@@ -58,6 +58,29 @@ const GRADE_DOT = {
   info: "bg-gray-400",
 }
 
+// Converts Lighthouse markdown links [text](url) to <a> elements.
+// Lighthouse descriptions contain only this pattern — no need for a full parser.
+function renderDescription(text: string): React.ReactNode {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g)
+  return parts.map((part, i) => {
+    const match = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+    if (match) {
+      return (
+        <a
+          key={i}
+          href={match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground transition-colors"
+        >
+          {match[1]}
+        </a>
+      )
+    }
+    return part
+  })
+}
+
 export function AuditList({ lighthouseRaw }: AuditListProps) {
   const [open, setOpen] = useState(false)
   const lhr = lighthouseRaw as LighthouseResult | null
@@ -120,8 +143,8 @@ export function AuditList({ lighthouseRaw }: AuditListProps) {
                     </span>
                   )}
                 </div>
-                <p className="text-muted-foreground mt-0.5 text-xs line-clamp-2">
-                  {audit.description}
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                  {renderDescription(audit.description)}
                 </p>
               </div>
             </div>
