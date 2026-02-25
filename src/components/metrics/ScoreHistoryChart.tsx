@@ -58,6 +58,13 @@ function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
 }
 
+function formatDateWithTime(d: Date) {
+  const dt = new Date(d)
+  const date = dt.toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
+  const time = dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+  return `${date} ${time}`
+}
+
 function formatValue(tab: Tab, value: number) {
   if (tab === "score") return `${value}`
   if (tab === "cls") return value.toFixed(3)
@@ -87,7 +94,7 @@ export function ScoreHistoryChart({ data }: Props) {
   const hasLabLine = activeTab !== "inp"
   const hasCruxLine = activeTab !== "score"
 
-  const chartData = data.map((d) => {
+  const chartData = data.map((d, i) => {
     const lab: number | null =
       activeTab === "score" ? d.perfScore :
       activeTab === "lcp"   ? d.lcp :
@@ -102,7 +109,7 @@ export function ScoreHistoryChart({ data }: Props) {
       activeTab === "inp" ? d.cruxInp :
       null // score has no crux equivalent
 
-    return { date: formatDate(d.createdAt), lab, crux }
+    return { index: i, date: formatDate(d.createdAt), label: formatDateWithTime(d.createdAt), lab, crux }
   })
 
   const refs = REFS[activeTab]
@@ -149,10 +156,11 @@ export function ScoreHistoryChart({ data }: Props) {
         <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis
-            dataKey="date"
+            dataKey="index"
             tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
             tickLine={false}
             axisLine={false}
+            tickFormatter={(i: number) => chartData[i]?.date ?? ""}
           />
           <YAxis
             tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
@@ -162,13 +170,14 @@ export function ScoreHistoryChart({ data }: Props) {
             tickFormatter={(v) => yAxisFormatter(activeTab, v)}
           />
           <Tooltip
-            content={({ active, payload, label }) => {
-              if (!active) return null
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null
+              const point = payload[0]?.payload as { label: string } | undefined
               const lab = payload?.find((p) => p.dataKey === "lab")?.value as number | null | undefined
               const crux = payload?.find((p) => p.dataKey === "crux")?.value as number | null | undefined
               return (
                 <div style={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "8px 10px" }}>
-                  <p style={{ fontWeight: 600, marginBottom: 6 }}>{label}</p>
+                  <p style={{ fontWeight: 600, marginBottom: 6 }}>{point?.label}</p>
                   {hasLabLine && (
                     <div style={{ display: "flex", alignItems: "center", gap: 6, margin: "3px 0" }}>
                       <span style={{ display: "inline-block", width: 10, height: 3, borderRadius: 2, backgroundColor: LAB_COLOR, flexShrink: 0 }} />
