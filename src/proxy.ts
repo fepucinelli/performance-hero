@@ -2,6 +2,7 @@ import {
   clerkMiddleware,
   createRouteMatcher,
 } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
 
 // Routes that require authentication.
 // Clerk will redirect to sign-in if a user without a session visits these.
@@ -12,9 +13,18 @@ const isProtectedRoute = createRouteMatcher([
   "/reports(.*)",
 ])
 
-export default clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware(async (auth, req): Promise<NextResponse | void> => {
   if (isProtectedRoute(req)) {
     await auth.protect()
+    return
+  }
+
+  // Redirect logged-in users away from the landing page to the dashboard
+  if (req.nextUrl.pathname === "/") {
+    const { userId } = await auth()
+    if (userId) {
+      return NextResponse.redirect(new URL("/dashboard", req.url))
+    }
   }
 })
 
