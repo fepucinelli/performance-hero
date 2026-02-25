@@ -90,10 +90,42 @@ export function MetricCard({ metric, value, fieldValue, className }: MetricCardP
             </div>
           )}
         </div>
+      ) : fieldValue !== null && fieldValue !== undefined ? (
+        // No lab value but CrUX field data is available (e.g. INP)
+        (() => {
+          const fieldGrade = gradeMetric(metric, fieldValue)
+          const fieldStyles = GRADE_STYLES[fieldGrade]
+          return (
+            <div className="space-y-2">
+              <div className="flex items-end justify-between">
+                <span className="text-2xl font-bold tabular-nums">
+                  {formatMetricValue(metric, fieldValue)}
+                </span>
+                <span
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 text-xs font-medium",
+                    fieldStyles.badge
+                  )}
+                >
+                  {GRADE_LABELS[fieldGrade]}
+                </span>
+              </div>
+              <GradeBar metric={metric} value={fieldValue} />
+              <p className="text-muted-foreground text-xs">Dados reais de usuários (P75)</p>
+            </div>
+          )
+        })()
       ) : (
-        <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-          Sem dados
+        <div className="space-y-1">
+          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+            {metric === "inp" ? "Requer dados de usuários reais" : "Sem dados"}
+          </div>
+          {metric === "inp" && (
+            <p className="text-muted-foreground text-xs leading-snug">
+              INP não pode ser medido em laboratório — ele aparece quando o site tem tráfego suficiente no Chrome.
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -48,39 +48,48 @@ export async function runPSIAudit(
     throw new PSIError(message, res.status)
   }
 
+  type CrUXMetrics = {
+    LARGEST_CONTENTFUL_PAINT_MS?: { percentiles?: { p75?: number } }
+    CUMULATIVE_LAYOUT_SHIFT_SCORE?: { percentiles?: { p75?: number } }
+    INTERACTION_TO_NEXT_PAINT?: { percentiles?: { p75?: number } }
+    FIRST_CONTENTFUL_PAINT_MS?: { percentiles?: { p75?: number } }
+  }
+  type CrUXExperience = { metrics?: CrUXMetrics }
+
   const data = (await res.json()) as {
     lighthouseResult: LighthouseResult
-    loadingExperience?: {
-      metrics?: {
-        LARGEST_CONTENTFUL_PAINT_MS?: { percentiles?: { p75?: number } }
-        CUMULATIVE_LAYOUT_SHIFT_SCORE?: { percentiles?: { p75?: number } }
-        INTERACTION_TO_NEXT_PAINT?: { percentiles?: { p75?: number } }
-        FIRST_CONTENTFUL_PAINT_MS?: { percentiles?: { p75?: number } }
-      }
-    }
+    // Page-level CrUX — only present when the specific page has enough traffic
+    loadingExperience?: CrUXExperience
+    // Origin-level CrUX — available for most sites with any meaningful traffic
+    originLoadingExperience?: CrUXExperience
   }
 
   const lhr = data.lighthouseResult
-  const field = data.loadingExperience
+
+  // Prefer page-level CrUX; fall back to origin-level when page metrics are absent
+  const pageMetrics = data.loadingExperience?.metrics
+  const originMetrics = data.originLoadingExperience?.metrics
+  const crux = (key: keyof CrUXMetrics): number | null =>
+    pageMetrics?.[key]?.percentiles?.p75 ??
+    originMetrics?.[key]?.percentiles?.p75 ??
+    null
 
   return {
     perfScore: Math.round((lhr.categories.performance.score ?? 0) * 100),
     lcp: getNumericValue(lhr, "largest-contentful-paint"),
     cls: getNumericValue(lhr, "cumulative-layout-shift"),
-    inp: getNumericValue(lhr, "interaction-to-next-paint"),
+    // INP has no lab value — Lighthouse can't measure it without real interactions.
+    // cruxInp carries the real-user INP from CrUX when available.
+    inp: null,
     fcp: getNumericValue(lhr, "first-contentful-paint"),
     ttfb: getNumericValue(lhr, "server-response-time"),
     tbt: getNumericValue(lhr, "total-blocking-time"),
     speedIndex: getNumericValue(lhr, "speed-index"),
-    // CrUX field data — null when origin has insufficient traffic
-    cruxLcp:
-      field?.metrics?.LARGEST_CONTENTFUL_PAINT_MS?.percentiles?.p75 ?? null,
-    cruxCls:
-      field?.metrics?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.percentiles?.p75 ?? null,
-    cruxInp:
-      field?.metrics?.INTERACTION_TO_NEXT_PAINT?.percentiles?.p75 ?? null,
-    cruxFcp:
-      field?.metrics?.FIRST_CONTENTFUL_PAINT_MS?.percentiles?.p75 ?? null,
+    // CrUX field data — page-level preferred, origin-level as fallback
+    cruxLcp: crux("LARGEST_CONTENTFUL_PAINT_MS"),
+    cruxCls: crux("CUMULATIVE_LAYOUT_SHIFT_SCORE"),
+    cruxInp: crux("INTERACTION_TO_NEXT_PAINT"),
+    cruxFcp: crux("FIRST_CONTENTFUL_PAINT_MS"),
     lighthouseRaw: lhr,
     psiApiVersion: lhr.lighthouseVersion,
   }
