@@ -156,15 +156,25 @@ export function ScoreHistoryChart({ data }: Props) {
             tickFormatter={(v) => yAxisFormatter(activeTab, v)}
           />
           <Tooltip
-            formatter={(value: number | undefined, name: string | undefined) => [
-              value != null ? formatValue(activeTab, value) : "—",
-              name === "lab" ? "Laboratório (simulado)" : "Usuários reais (P75)",
-            ]}
-            contentStyle={{
-              fontSize: 12,
-              borderRadius: 8,
-              border: "1px solid hsl(var(--border))",
-              background: "hsl(var(--background))",
+            content={({ active, payload, label }) => {
+              if (!active) return null
+              const lab = payload?.find((p) => p.dataKey === "lab")?.value as number | null | undefined
+              const crux = payload?.find((p) => p.dataKey === "crux")?.value as number | null | undefined
+              return (
+                <div style={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "8px 10px" }}>
+                  <p style={{ fontWeight: 600, marginBottom: 4 }}>{label}</p>
+                  {hasLabLine && (
+                    <p style={{ color: LAB_COLOR, margin: "2px 0" }}>
+                      ⚗ Laboratório: {lab != null ? formatValue(activeTab, lab) : "Sem dados"}
+                    </p>
+                  )}
+                  {hasCruxLine && (
+                    <p style={{ color: CRUX_COLOR, margin: "2px 0" }}>
+                      👥 Usuários reais (P75): {crux != null ? formatValue(activeTab, crux) : "Sem dados"}
+                    </p>
+                  )}
+                </div>
+              )
             }}
           />
 
