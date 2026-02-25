@@ -62,7 +62,7 @@ export default async function SharePage({
       <header className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold">
-            ⚡ Performance Radar
+            ⚡ PerfAlly
           </Link>
           <Button size="sm" asChild>
             <Link href="/sign-up">Analise seu site gratuitamente →</Link>

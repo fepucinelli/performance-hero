@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Performance Radar",
-    template: "%s | Performance Radar",
+    default: "PerfAlly",
+    template: "%s | PerfAlly",
   },
   description:
     "Core Web Vitals monitoring for founders, not engineers. Plain-English reports with a prioritized action plan.",

@@ -14,14 +14,14 @@ export default function MarketingLayout({
             href="/"
             className="flex items-center gap-2 font-semibold tracking-tight"
           >
-            ⚡ Performance Radar
+            ⚡ PerfAlly
           </Link>
           <nav className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/sign-in">Sign in</Link>
+              <Link href="/sign-in">Entrar</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/sign-up">Get started free</Link>
+              <Link href="/sign-up">Cadastre-se gratuitamente</Link>
             </Button>
           </nav>
         </div>
@@ -32,7 +32,7 @@ export default function MarketingLayout({
       <footer className="border-border/40 border-t py-8">
         <div className="mx-auto max-w-5xl px-4">
           <p className="text-muted-foreground text-center text-sm">
-            © {new Date().getFullYear()} Performance Radar. Built for founders.
+            © {new Date().getFullYear()} PerfAlly. Built for founders.
           </p>
         </div>
       </footer>

@@ -29,7 +29,7 @@ export function Sidebar() {
           href="/dashboard"
           className="flex items-center gap-2 font-semibold tracking-tight"
         >
-          ⚡ Performance Radar
+          ⚡ PerfAlly
         </Link>
       </div>
 
