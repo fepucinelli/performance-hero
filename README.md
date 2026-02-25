@@ -57,7 +57,7 @@ Most small companies don't know what Core Web Vitals are, or can't configure ent
 ## Project Structure
 
 ```
-performance-radar/
+perf-ally/
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/               # Clerk sign-in / sign-up pages
@@ -121,8 +121,8 @@ performance-radar/
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/fepucinelli/performance-radar.git
-cd performance-radar
+git clone https://github.com/fepucinelli/perf-ally.git
+cd perf-ally
 pnpm install
 ```
 

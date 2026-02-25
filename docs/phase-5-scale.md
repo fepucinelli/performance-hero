@@ -51,7 +51,7 @@ Show key once on creation (store only hash). Prefix: `pr_live_` for production, 
 
 ```yaml
 # .github/workflows/performance.yml
-- uses: performance-radar/audit-action@v1
+- uses: perf-ally/audit-action@v1
   with:
     url: ${{ env.DEPLOY_URL }}
     api-key: ${{ secrets.PERFORMANCE_RADAR_KEY }}
@@ -79,7 +79,7 @@ INP              210ms      180ms    ▼
 View full report →
 ```
 
-Build as a separate public repo: `performance-radar/audit-action`. Marketplace listing drives discovery.
+Build as a separate public repo: `perf-ally/audit-action`. Marketplace listing drives discovery.
 
 ### 3. Deploy Webhook Integration
 

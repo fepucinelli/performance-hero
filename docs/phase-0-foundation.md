@@ -18,7 +18,7 @@ pnpx create-next-app@latest performance-radar \
   --app \
   --src-dir \
   --import-alias "@/*"
-cd performance-radar
+cd perf-ally
 pnpm install
 ```
 

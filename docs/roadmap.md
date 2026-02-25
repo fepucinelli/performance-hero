@@ -179,7 +179,7 @@ See [`phase-4-growth.md`](./phase-4-growth.md) for detailed steps.
   - [ ] Documented with OpenAPI spec
   - [ ] Rate-limited per plan
 - [ ] GitHub Action
-  - [ ] `performance-radar/audit-action`
+  - [ ] `perf-ally/audit-action`
   - [ ] Runs audit on PR, posts comment with score diff
   - [ ] Blocks merge if performance regresses beyond budget
 - [ ] WordPress plugin

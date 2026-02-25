@@ -24,9 +24,9 @@ pnpm add stripe @stripe/stripe-js
 ```
 
 **Products to create in Stripe:**
-- Product: "Performance Radar Starter" — R$99/month
-- Product: "Performance Radar Pro" — R$249/month
-- Product: "Performance Radar Agência" — R$499/month
+- Product: "PerfAlly Starter" — R$99/month
+- Product: "PerfAlly Pro" — R$249/month
+- Product: "PerfAlly Agência" — R$499/month
 
 Store Price IDs in env:
 ```

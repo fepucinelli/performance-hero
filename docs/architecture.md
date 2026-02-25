@@ -171,7 +171,7 @@ Generated PDF is streamed to Vercel Blob storage, then a signed URL is returned 
 ## Vercel Deployment Strategy
 
 ```
-main branch → production (performance-radar.com)
+main branch → production (perf-ally.com)
 preview branches → preview URLs (auto, per PR)
 ```
 
