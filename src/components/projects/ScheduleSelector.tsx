@@ -81,7 +81,7 @@ export function ScheduleSelector({ projectId, currentSchedule, userPlan }: Props
             <button
               key={opt.value}
               onClick={() => handleChange(opt.value)}
-              disabled={isPending || lockedSchedule}
+              disabled={isPending || locked}
               title={lockedSchedule ? "Faça upgrade para ativar auditorias agendadas" : opt.description}
               className={[
                 "rounded-lg border px-3 py-2 text-sm transition-colors text-left",
