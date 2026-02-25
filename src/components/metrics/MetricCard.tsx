@@ -81,9 +81,13 @@ export function MetricCard({ metric, value, fieldValue, className }: MetricCardP
         </p>
         {fieldValue !== null && fieldValue !== undefined ? (
           <MetricValue metric={metric} value={fieldValue} />
+        ) : metric === "ttfb" ? (
+          <p className="text-muted-foreground text-xs">
+            TTFB não é incluído no Chrome UX Report — disponível apenas como dado de laboratório.
+          </p>
         ) : (
-          <p className="text-muted-foreground text-sm">
-            Sem dados de campo
+          <p className="text-muted-foreground text-xs">
+            Site sem dados suficientes no Chrome UX Report. Disponível apenas para sites com tráfego real significativo.
           </p>
         )}
       </div>
