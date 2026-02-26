@@ -1,0 +1,45 @@
+# Build & Runtime
+.next/
+.vercel/
+dist/
+build/
+out/
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+*.pnpm-lock.yaml
+
+# Environment & Secrets
+.env.local
+.env.*.local
+.env
+
+# Logs & Caches
+*.log
+logs/
+.cache/
+.turbo/
+
+# Git
+.git/
+.gitignore
+
+# IDE & System
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Test Coverage
+coverage/
+.nyc_output/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Keep docs/ - they're referenced in claude.md
