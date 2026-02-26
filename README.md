@@ -445,12 +445,12 @@ NODE_OPTIONS=--max_old_space_size=4096 pnpm build
 - Core dashboard & metrics display
 - User authentication
 - Free tier functionality
+- Stripe billing system
 - Basic explanations (simple heuristics)
 
 ### 🚀 Phase 2 (In Progress → Launch Ready)
 - AI-powered explanations (Claude integration)
 - Pro & Agency subscription tiers
-- Stripe billing system
 - Usage tracking & quotas
 - Weekly digest emails
 - Team invitations (Agency)
@@ -458,7 +458,6 @@ NODE_OPTIONS=--max_old_space_size=4096 pnpm build
 ### 📅 Phase 3 (Planned)
 - White-label dashboards (Agency)
 - Advanced API endpoints
-- Mobile app
 - Custom alert rules
 - Slack/Teams integrations
 - Performance benchmarking
@@ -468,59 +467,9 @@ See [Phase Roadmaps](./docs/) for detailed breakdowns.
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions! Here's how:
-
-1. **Fork** the repository
-2. **Create branch** for your feature: `git checkout -b feature/amazing-feature`
-3. **Follow conventions** in [claude.md](./claude.md)
-4. **Write tests** for critical paths
-5. **Commit** with clear messages
-6. **Push** and **create Pull Request**
-
-**PR Checklist:**
-- [ ] Feature implemented per spec
-- [ ] All tests pass (`pnpm test`)
-- [ ] Code linted (`pnpm lint`)
-- [ ] Database migrations included (if needed)
-- [ ] Documentation updated
-- [ ] No breaking changes (or clearly noted)
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
-
----
-
-## 📞 Support & Community
-
-- **Issues & Bugs:** [GitHub Issues](https://github.com/felipepucinelli/perf-ally/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/felipepucinelli/perf-ally/discussions)
-- **Email:** support@perf-ally.com
-- **Twitter:** [@perf_ally](https://twitter.com/perf_ally)
-
----
-
 ## 📄 License
 
 This project is licensed under the **MIT License** – see [LICENSE](./LICENSE) file for details.
-
----
-
-## 👤 Author
-
-**Felipe Pucinelli**
-- GitHub: [@felipepucinelli](https://github.com/felipepucinelli)
-- Email: felipe@perf-ally.com
-
----
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org) – Amazing React framework
-- [PostgreSQL](https://www.postgresql.org) – Reliable database
-- [Claude API](https://claude.ai) – AI-powered insights
-- [Stripe](https://stripe.com) – Payment processing
-- [TailwindCSS](https://tailwindcss.com) – Beautiful styling
 
 ---
 
