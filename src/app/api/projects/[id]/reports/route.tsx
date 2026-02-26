@@ -74,21 +74,36 @@ export async function POST(
     />
   )
 
-  // Upload to Vercel Blob
-  const filename = `${project.id}/${audit.id}.pdf`
-  const { url } = await put(filename, pdfBuffer, {
-    access: "public",
-    contentType: "application/pdf",
-    addRandomSuffix: false,
-  })
+  // If Blob token is configured, upload and save a persistent record.
+  // Otherwise (local dev) stream the PDF directly as a download.
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const filename = `${project.id}/${audit.id}.pdf`
+    const { url } = await put(filename, pdfBuffer, {
+      access: "public",
+      contentType: "application/pdf",
+      addRandomSuffix: false,
+    })
 
-  // Save report record
-  await db.insert(reports).values({
-    projectId: project.id,
-    auditId: audit.id,
-    blobUrl: url,
-    createdBy: userId,
-  })
+    await db.insert(reports).values({
+      projectId: project.id,
+      auditId: audit.id,
+      blobUrl: url,
+      createdBy: userId,
+    })
 
-  return NextResponse.json({ url })
+    return NextResponse.json({ url })
+  }
+
+  // No Blob token — stream PDF directly
+  const safeName = project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()
+  const now = new Date()
+  const datePart = now.toISOString().slice(0, 10) // YYYY-MM-DD
+  const hourPart = now.toISOString().slice(11, 13) + "h" + now.toISOString().slice(14, 16) // HHhMM
+  const filename = `${safeName}-${datePart}-${hourPart}.pdf`
+  return new Response(pdfBuffer, {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    },
+  })
 }
