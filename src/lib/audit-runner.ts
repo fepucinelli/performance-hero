@@ -4,7 +4,7 @@
  * Called by both the manual audit route (/api/projects/[id]/audit)
  * and the scheduled job handler (/api/jobs/run-audit).
  */
-import { db, projects, auditResults, users } from "@/lib/db"
+import { db, projects, auditResults, users, projectPages } from "@/lib/db"
 import { eq, and, gte, isNotNull, count } from "drizzle-orm"
 import { runPSIAudit, PSIError } from "@/lib/api/pagespeed"
 import { fetchCrUXHistory } from "@/lib/api/crux-history"
@@ -17,13 +17,14 @@ import type { Strategy } from "@/lib/db/schema"
 export { PSIError }
 
 /**
- * Run a PSI audit for the given project and persist the result.
+ * Run a PSI audit for the given project page and persist the result.
  * Returns the new auditResult ID.
- * Throws PSIError on API failure or Error if project not found.
+ * Throws PSIError on API failure or Error if project/page not found.
  */
 export async function runAuditForProject(
   projectId: string,
-  triggeredBy: "manual" | "cron" | "api"
+  triggeredBy: "manual" | "cron" | "api",
+  pageId: string
 ): Promise<string> {
   const project = await db.query.projects.findFirst({
     where: eq(projects.id, projectId),
@@ -32,12 +33,20 @@ export async function runAuditForProject(
     throw new Error(`Project not found: ${projectId}`)
   }
 
-  const auditData = await runPSIAudit(project.url, project.strategy as Strategy)
+  const page = await db.query.projectPages.findFirst({
+    where: eq(projectPages.id, pageId),
+  })
+  if (!page) {
+    throw new Error(`Page not found: ${pageId}`)
+  }
+
+  const auditData = await runPSIAudit(page.url, project.strategy as Strategy)
 
   const [result] = await db
     .insert(auditResults)
     .values({
       projectId: project.id,
+      pageId,
       strategy: project.strategy,
       perfScore: auditData.perfScore,
       lcp: auditData.lcp,
@@ -71,7 +80,7 @@ export async function runAuditForProject(
     .where(eq(projects.id, project.id))
 
   // Fetch CrUX History (25-week real-user data) — fire-and-forget
-  void fetchCrUXHistory(project.url).then((cruxHistory) => {
+  void fetchCrUXHistory(page.url).then((cruxHistory) => {
     if (!cruxHistory) return
     return db
       .update(auditResults)
@@ -81,7 +90,7 @@ export async function runAuditForProject(
 
   // Fire alerts if any thresholds are breached (no-op if none configured)
   await checkAndFireAlerts(
-    { id: project.id, userId: project.userId, name: project.name, url: project.url },
+    { id: project.id, userId: project.userId, name: project.name, url: page.url },
     { id: result.id, lcp: result.lcp, cls: result.cls, inp: result.inp, triggeredBy: result.triggeredBy }
   )
 
@@ -90,7 +99,7 @@ export async function runAuditForProject(
     await maybeGenerateAIActionPlan(
       result.id,
       project.userId,
-      project.url,
+      page.url,
       {
         perfScore: result.perfScore,
         lcp: result.lcp,

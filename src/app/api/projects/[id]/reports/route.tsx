@@ -2,10 +2,11 @@ import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { put } from "@vercel/blob"
-import { db, projects, auditResults, users, reports } from "@/lib/db"
+import { db, projects, auditResults, users, reports, projectPages } from "@/lib/db"
 import { eq, and, desc } from "drizzle-orm"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
 import { AuditReportPDF } from "@/lib/pdf/AuditReport"
+import type { PageEntry } from "@/lib/pdf/AuditReport"
 import type { Plan } from "@/lib/db/schema"
 
 export async function POST(
@@ -35,13 +36,49 @@ export async function POST(
     )
   }
 
-  // Latest audit
-  const audit = await db.query.auditResults.findFirst({
-    where: eq(auditResults.projectId, project.id),
-    orderBy: [desc(auditResults.createdAt)],
+  // Fetch all pages for this project
+  const allPages = await db.query.projectPages.findMany({
+    where: eq(projectPages.projectId, project.id),
+    orderBy: (pp, { asc }) => [asc(pp.createdAt)],
   })
-  if (!audit) {
-    return NextResponse.json({ error: "No audit found for this project" }, { status: 404 })
+
+  // Fetch latest audit per page and build page entries
+  const pageEntries: PageEntry[] = []
+  for (const page of allPages) {
+    const audit = await db.query.auditResults.findFirst({
+      where: and(
+        eq(auditResults.projectId, project.id),
+        eq(auditResults.pageId, page.id)
+      ),
+      orderBy: [desc(auditResults.createdAt)],
+    })
+    if (audit) {
+      pageEntries.push({
+        page: { url: page.url, label: page.label },
+        audit: {
+          perfScore: audit.perfScore,
+          seoScore: audit.seoScore,
+          accessibilityScore: audit.accessibilityScore,
+          bestPracticesScore: audit.bestPracticesScore,
+          lcp: audit.lcp,
+          cls: audit.cls,
+          inp: audit.inp,
+          fcp: audit.fcp,
+          ttfb: audit.ttfb,
+          cruxLcp: audit.cruxLcp,
+          cruxCls: audit.cruxCls,
+          cruxInp: audit.cruxInp,
+          cruxFcp: audit.cruxFcp,
+          lighthouseRaw: audit.lighthouseRaw,
+          aiActionPlan: audit.aiActionPlan,
+          createdAt: audit.createdAt,
+        },
+      })
+    }
+  }
+
+  if (pageEntries.length === 0) {
+    return NextResponse.json({ error: "No audits found for this project" }, { status: 404 })
   }
 
   // Generate PDF
@@ -52,24 +89,7 @@ export async function POST(
         url: project.url,
         strategy: project.strategy,
       }}
-      audit={{
-        perfScore: audit.perfScore,
-        seoScore: audit.seoScore,
-        accessibilityScore: audit.accessibilityScore,
-        bestPracticesScore: audit.bestPracticesScore,
-        lcp: audit.lcp,
-        cls: audit.cls,
-        inp: audit.inp,
-        fcp: audit.fcp,
-        ttfb: audit.ttfb,
-        cruxLcp: audit.cruxLcp,
-        cruxCls: audit.cruxCls,
-        cruxInp: audit.cruxInp,
-        cruxFcp: audit.cruxFcp,
-        lighthouseRaw: audit.lighthouseRaw,
-        aiActionPlan: audit.aiActionPlan,
-        createdAt: audit.createdAt,
-      }}
+      pages={pageEntries}
       // branding: future Phase 3 white-label — omitted for now
     />
   )
@@ -77,19 +97,32 @@ export async function POST(
   // If Blob token is configured, upload and save a persistent record.
   // Otherwise (local dev) stream the PDF directly as a download.
   if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const filename = `${project.id}/${audit.id}.pdf`
+    const firstAuditId = pageEntries[0]
+      ? await db.query.auditResults.findFirst({
+          where: and(
+            eq(auditResults.projectId, project.id),
+            eq(auditResults.pageId, allPages[0]?.id ?? "")
+          ),
+          orderBy: [desc(auditResults.createdAt)],
+          columns: { id: true },
+        }).then((r) => r?.id)
+      : undefined
+
+    const filename = `${project.id}/report-${Date.now()}.pdf`
     const { url } = await put(filename, pdfBuffer, {
       access: "public",
       contentType: "application/pdf",
       addRandomSuffix: false,
     })
 
-    await db.insert(reports).values({
-      projectId: project.id,
-      auditId: audit.id,
-      blobUrl: url,
-      createdBy: userId,
-    })
+    if (firstAuditId) {
+      await db.insert(reports).values({
+        projectId: project.id,
+        auditId: firstAuditId,
+        blobUrl: url,
+        createdBy: userId,
+      })
+    }
 
     return NextResponse.json({ url })
   }
@@ -97,12 +130,11 @@ export async function POST(
   // No Blob token — stream PDF directly
   const safeName = project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()
   const now = new Date()
-  // Use local time for filename (America/Sao_Paulo)
   const pad = (n: number) => n.toString().padStart(2, "0")
   const datePart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
   const hourPart = `${pad(now.getHours())}h${pad(now.getMinutes())}`
   const filename = `${safeName}-${datePart}-${hourPart}.pdf`
-  return new Response(pdfBuffer, {
+  return new Response(new Uint8Array(pdfBuffer), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${filename}"`,

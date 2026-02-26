@@ -1,12 +1,12 @@
 import { auth } from "@clerk/nextjs/server"
-import { db, projects, auditResults, users } from "@/lib/db"
+import { db, projects, auditResults, users, projectPages } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { runAuditForProject, PSIError } from "@/lib/audit-runner"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
 import { getMonthlyRunCount } from "@/app/actions/projects"
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth()
@@ -16,12 +16,30 @@ export async function POST(
 
   const { id: projectId } = await params
 
+  // Read pageId from request body
+  const body = (await req.json().catch(() => ({}))) as { pageId?: string }
+  const { pageId } = body
+  if (!pageId) {
+    return Response.json({ error: "pageId is required" }, { status: 400 })
+  }
+
   // Verify project exists and belongs to this user
   const project = await db.query.projects.findFirst({
     where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
   })
   if (!project) {
     return Response.json({ error: "Project not found" }, { status: 404 })
+  }
+
+  // Verify page belongs to this project
+  const page = await db.query.projectPages.findFirst({
+    where: and(
+      eq(projectPages.id, pageId),
+      eq(projectPages.projectId, projectId)
+    ),
+  })
+  if (!page) {
+    return Response.json({ error: "Page not found" }, { status: 404 })
   }
 
   // Enforce monthly run limit for free plan
@@ -46,7 +64,7 @@ export async function POST(
   }
 
   try {
-    const auditId = await runAuditForProject(projectId, "manual")
+    const auditId = await runAuditForProject(projectId, "manual", pageId)
     const result = await db.query.auditResults.findFirst({
       where: eq(auditResults.id, auditId),
     })

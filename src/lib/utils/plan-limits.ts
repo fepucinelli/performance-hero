@@ -11,6 +11,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     slackAlerts: false,
     historyDays: 7,
     aiActionPlansPerMonth: 0,
+    maxPagesPerProject: 2,
   },
   starter: {
     maxProjects: 5,
@@ -22,6 +23,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     slackAlerts: false,
     historyDays: 30,
     aiActionPlansPerMonth: 5,
+    maxPagesPerProject: 10,
   },
   pro: {
     maxProjects: 20,
@@ -33,6 +35,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     slackAlerts: true,
     historyDays: 90,
     aiActionPlansPerMonth: 30,
+    maxPagesPerProject: 50,
   },
   agency: {
     maxProjects: 100,
@@ -44,5 +47,6 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     slackAlerts: true,
     historyDays: 365,
     aiActionPlansPerMonth: -1,
+    maxPagesPerProject: -1,
   },
 }

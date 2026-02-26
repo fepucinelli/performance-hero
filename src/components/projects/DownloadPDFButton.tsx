@@ -25,7 +25,9 @@ export function DownloadPDFButton({ projectId, canGeneratePDF }: Props) {
   async function handleClick() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/projects/${projectId}/reports`, { method: "POST" })
+      const res = await fetch(`/api/projects/${projectId}/reports`, {
+        method: "POST",
+      })
       if (!res.ok) {
         const body = (await res.json()) as { error?: string }
         throw new Error(body.error ?? "Erro ao gerar PDF")

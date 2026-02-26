@@ -7,8 +7,8 @@
  * In production: verifies the Upstash-Signature header.
  * In dev (no signing keys): skips verification for easy local testing.
  */
-import { db, projects } from "@/lib/db"
-import { eq } from "drizzle-orm"
+import { db, projects, projectPages } from "@/lib/db"
+import { eq, and } from "drizzle-orm"
 import { env } from "@/env"
 import { runAuditForProject, PSIError } from "@/lib/audit-runner"
 import { tomorrowNoonBRT } from "@/lib/utils/schedule"
@@ -37,12 +37,14 @@ export async function POST(req: Request) {
   }
 
   let projectId: string
+  let pageId: string | undefined
   try {
-    const body = JSON.parse(rawBody) as { projectId?: unknown }
+    const body = JSON.parse(rawBody) as { projectId?: unknown; pageId?: unknown }
     if (typeof body.projectId !== "string") {
       return Response.json({ error: "Missing projectId" }, { status: 400 })
     }
     projectId = body.projectId
+    pageId = typeof body.pageId === "string" ? body.pageId : undefined
   } catch {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 })
   }
@@ -56,8 +58,21 @@ export async function POST(req: Request) {
     return Response.json({ error: "Project not found" }, { status: 404 })
   }
 
+  // If no pageId provided, fall back to first page of project
+  if (!pageId) {
+    const firstPage = await db.query.projectPages.findFirst({
+      where: eq(projectPages.projectId, projectId),
+      orderBy: (pp, { asc }) => [asc(pp.createdAt)],
+      columns: { id: true },
+    })
+    if (!firstPage) {
+      return Response.json({ error: "No pages found for project" }, { status: 404 })
+    }
+    pageId = firstPage.id
+  }
+
   try {
-    await runAuditForProject(projectId, "cron")
+    await runAuditForProject(projectId, "cron", pageId)
 
     // Schedule the next run based on the project's cadence
     const next = project.schedule === "hourly"

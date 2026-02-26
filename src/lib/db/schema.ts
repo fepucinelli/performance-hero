@@ -101,6 +101,28 @@ export const projects = pgTable(
   ]
 )
 
+// ─── Project Pages ───────────────────────────────────────────────────────────
+// Each project can audit multiple sub-pages (e.g. /, /products, /careers).
+
+export const projectPages = pgTable(
+  "project_pages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    label: text("label"), // optional display name
+    url: text("url").notNull(),
+    createdAt: timestamptz("created_at")
+      .notNull()
+      .default(sql`NOW()`),
+    updatedAt: timestamptz("updated_at")
+      .notNull()
+      .default(sql`NOW()`),
+  },
+  (t) => [index("project_pages_project_id_idx").on(t.projectId)]
+)
+
 // ─── Audit Results ───────────────────────────────────────────────────────────
 // One row per Lighthouse run. Immutable once written.
 
@@ -111,6 +133,10 @@ export const auditResults = pgTable(
     projectId: uuid("project_id")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
+    // Which page was audited — nullable for backward compat with old rows
+    pageId: uuid("page_id").references(() => projectPages.id, {
+      onDelete: "set null",
+    }),
 
     strategy: text("strategy", { enum: ["mobile", "desktop"] }).notNull(),
 
@@ -226,6 +252,10 @@ export const reports = pgTable(
     auditId: uuid("audit_id")
       .notNull()
       .references(() => auditResults.id, { onDelete: "cascade" }),
+    // Which page this report covers — nullable for backward compat
+    pageId: uuid("page_id").references(() => projectPages.id, {
+      onDelete: "set null",
+    }),
 
     blobUrl: text("blob_url").notNull(),
     createdBy: text("created_by")
@@ -251,12 +281,26 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   auditResults: many(auditResults),
   alerts: many(alerts),
   reports: many(reports),
+  pages: many(projectPages),
+}))
+
+export const projectPagesRelations = relations(projectPages, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [projectPages.projectId],
+    references: [projects.id],
+  }),
+  auditResults: many(auditResults),
+  reports: many(reports),
 }))
 
 export const auditResultsRelations = relations(auditResults, ({ one }) => ({
   project: one(projects, {
     fields: [auditResults.projectId],
     references: [projects.id],
+  }),
+  page: one(projectPages, {
+    fields: [auditResults.pageId],
+    references: [projectPages.id],
   }),
 }))
 
@@ -299,6 +343,9 @@ export type NewProject = InferInsertModel<typeof projects>
 
 export type AuditResult = InferSelectModel<typeof auditResults>
 export type NewAuditResult = InferInsertModel<typeof auditResults>
+
+export type ProjectPage = InferSelectModel<typeof projectPages>
+export type NewProjectPage = InferInsertModel<typeof projectPages>
 
 export type Alert = InferSelectModel<typeof alerts>
 export type Report = InferSelectModel<typeof reports>

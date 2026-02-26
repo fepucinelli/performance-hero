@@ -3,8 +3,9 @@ export const dynamic = "force-dynamic"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
-import { db, projects, auditResults, users } from "@/lib/db"
-import { eq, and, desc, gte } from "drizzle-orm"
+import { db, projects, auditResults, users, projectPages } from "@/lib/db"
+import { eq, and, desc, gte, isNull } from "drizzle-orm"
+import { sql } from "drizzle-orm"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +21,7 @@ import { DownloadPDFButton } from "@/components/projects/DownloadPDFButton"
 import { ScoreHistoryChart } from "@/components/metrics/ScoreHistoryChart"
 import { ScheduleSelector } from "@/components/projects/ScheduleSelector"
 import { AlertThresholds } from "@/components/projects/AlertThresholds"
+import { PageTabs } from "@/components/projects/PageTabs"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
 import { getMonthlyRunCount } from "@/app/actions/projects"
 import type { Plan } from "@/lib/db/schema"
@@ -44,10 +46,13 @@ export async function generateMetadata({
 
 export default async function ProjectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ page?: string }>
 }) {
   const { id } = await params
+  const { page: pageParam } = await searchParams
   const { userId } = await auth()
   if (!userId) notFound()
 
@@ -56,13 +61,49 @@ export default async function ProjectPage({
   })
   if (!project) notFound()
 
-  // User plan — needed to determine history window and run limits
+  // User plan — needed to determine history window, run limits, and page limits
   const dbUser = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: { plan: true },
   })
   const userPlan: Plan = (dbUser?.plan ?? "free") as Plan
   const planLimits = PLAN_LIMITS[userPlan]
+
+  // Fetch all pages for this project
+  let pages = await db.query.projectPages.findMany({
+    where: eq(projectPages.projectId, project.id),
+    orderBy: (pp, { asc }) => [asc(pp.createdAt)],
+  })
+
+  // Auto-migration: if no pages exist yet, create default from project.url
+  // and tag all existing auditResults that have no pageId
+  if (pages.length === 0) {
+    const [newPage] = await db
+      .insert(projectPages)
+      .values({ projectId: project.id, url: project.url })
+      .returning()
+
+    if (newPage) {
+      // Tag existing audit results
+      await db
+        .update(auditResults)
+        .set({ pageId: newPage.id })
+        .where(
+          and(
+            eq(auditResults.projectId, project.id),
+            isNull(auditResults.pageId)
+          )
+        )
+
+      pages = [newPage]
+    }
+  }
+
+  // Resolve selected page — from ?page= param, else first
+  const selectedPage =
+    pages.find((p) => p.id === pageParam) ?? pages[0]
+
+  if (!selectedPage) notFound()
 
   // History start date based on plan's historyDays limit
   const historyStart = new Date()
@@ -71,12 +112,16 @@ export default async function ProjectPage({
   // Fetch latest audit, history, and monthly run count in parallel
   const [latestAudit, historyDesc, monthlyRunCount] = await Promise.all([
     db.query.auditResults.findFirst({
-      where: eq(auditResults.projectId, project.id),
+      where: and(
+        eq(auditResults.projectId, project.id),
+        eq(auditResults.pageId, selectedPage.id)
+      ),
       orderBy: [desc(auditResults.createdAt)],
     }),
     db.query.auditResults.findMany({
       where: and(
         eq(auditResults.projectId, project.id),
+        eq(auditResults.pageId, selectedPage.id),
         gte(auditResults.createdAt, historyStart),
       ),
       orderBy: [desc(auditResults.createdAt)],
@@ -129,12 +174,28 @@ export default async function ProjectPage({
             </Badge>
           </div>
         </div>
-        <RunAuditButton
-          projectId={project.id}
-          runsUsed={monthlyRunCount === -1 ? undefined : monthlyRunCount}
-          maxRuns={planLimits.manualRunsPerMonth === -1 ? undefined : planLimits.manualRunsPerMonth}
-        />
+        <div className="flex items-center gap-2">
+          <DownloadPDFButton
+            projectId={project.id}
+            canGeneratePDF={planLimits.pdfReports}
+          />
+          <RunAuditButton
+            projectId={project.id}
+            pageId={selectedPage.id}
+            runsUsed={monthlyRunCount === -1 ? undefined : monthlyRunCount}
+            maxRuns={planLimits.manualRunsPerMonth === -1 ? undefined : planLimits.manualRunsPerMonth}
+          />
+        </div>
       </div>
+
+      {/* Page tabs */}
+      <PageTabs
+        pages={pages}
+        selectedPageId={selectedPage.id}
+        projectId={project.id}
+        maxPages={planLimits.maxPagesPerProject}
+        userPlan={userPlan}
+      />
 
       {latestAudit ? (
         <>
@@ -147,18 +208,12 @@ export default async function ProjectPage({
             lighthouseVersion={latestAudit.psiApiVersion}
             auditedAt={latestAudit.createdAt}
             shareSlot={
-              <div className="flex gap-2">
-                <DownloadPDFButton
-                  projectId={project.id}
-                  canGeneratePDF={planLimits.pdfReports}
-                />
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/share/${latestAudit.shareToken}`} target="_blank">
-                    <Share2 className="mr-1.5 h-3.5 w-3.5" />
-                    Compartilhar
-                  </Link>
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/share/${latestAudit.shareToken}`} target="_blank">
+                  <Share2 className="mr-1.5 h-3.5 w-3.5" />
+                  Compartilhar
+                </Link>
+              </Button>
             }
           />
 

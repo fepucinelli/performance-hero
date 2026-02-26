@@ -7,11 +7,12 @@ import { Zap, Loader2 } from "lucide-react"
 
 interface RunAuditButtonProps {
   projectId: string
+  pageId: string
   runsUsed?: number
   maxRuns?: number
 }
 
-export function RunAuditButton({ projectId, runsUsed, maxRuns }: RunAuditButtonProps) {
+export function RunAuditButton({ projectId, pageId, runsUsed, maxRuns }: RunAuditButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -23,6 +24,8 @@ export function RunAuditButton({ projectId, runsUsed, maxRuns }: RunAuditButtonP
     try {
       const res = await fetch(`/api/projects/${projectId}/audit`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pageId }),
       })
 
       const data = (await res.json()) as { error?: string }
@@ -43,7 +46,7 @@ export function RunAuditButton({ projectId, runsUsed, maxRuns }: RunAuditButtonP
 
   return (
     <div className="space-y-2">
-      <Button onClick={handleRun} disabled={loading}>
+      <Button size="sm" onClick={handleRun} disabled={loading}>
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

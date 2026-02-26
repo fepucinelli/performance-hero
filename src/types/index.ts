@@ -37,6 +37,8 @@ export interface PlanLimits {
   historyDays: number
   /** 0 = disabled, -1 = unlimited */
   aiActionPlansPerMonth: number
+  /** -1 = unlimited */
+  maxPagesPerProject: number
 }
 
 export type PlanName = "free" | "starter" | "pro" | "agency"
