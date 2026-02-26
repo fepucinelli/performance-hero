@@ -9,13 +9,13 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ScoreGauge } from "@/components/metrics/ScoreGauge"
 import { MetricCard } from "@/components/metrics/MetricCard"
 import { ActionPlan } from "@/components/metrics/ActionPlan"
 import { AuditList } from "@/components/metrics/AuditList"
+import { SEOAuditList } from "@/components/metrics/SEOAuditList"
+import { SiteHealthCard } from "@/components/metrics/SiteHealthCard"
 import { RunAuditButton } from "@/components/metrics/RunAuditButton"
-import { ChevronLeft, Share2, Clock, Globe } from "lucide-react"
-import { formatDistanceToNow } from "@/lib/utils/date"
+import { ChevronLeft, Share2, Globe } from "lucide-react"
 import { ScoreHistoryChart } from "@/components/metrics/ScoreHistoryChart"
 import { ScheduleSelector } from "@/components/projects/ScheduleSelector"
 import { AlertThresholds } from "@/components/projects/AlertThresholds"
@@ -83,6 +83,7 @@ export default async function ProjectPage({
       columns: {
         id: true,
         perfScore: true,
+        seoScore: true,
         lcp: true,
         cls: true,
         inp: true,
@@ -136,33 +137,23 @@ export default async function ProjectPage({
 
       {latestAudit ? (
         <>
-          {/* Score overview */}
-          <div className="flex flex-wrap items-center gap-6 rounded-xl border bg-white p-5 shadow-sm">
-            <ScoreGauge score={latestAudit.perfScore ?? 0} size="lg" />
-
-            <div className="flex-1 space-y-1">
-              <p className="text-lg font-semibold">Pontuação de Performance</p>
-              <p className="text-muted-foreground text-sm">
-                Baseado no Lighthouse {latestAudit.psiApiVersion ?? "audit"} ·
-                Dados de laboratório (throttling simulado)
-              </p>
-              <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                <Clock className="h-3 w-3" />
-                {formatDistanceToNow(latestAudit.createdAt)}
-              </div>
-            </div>
-
-            {/* Share link */}
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={`/share/${latestAudit.shareToken}`}
-                target="_blank"
-              >
-                <Share2 className="mr-1.5 h-3.5 w-3.5" />
-                Compartilhar relatório
-              </Link>
-            </Button>
-          </div>
+          {/* Site Health — composite 4-category score */}
+          <SiteHealthCard
+            perfScore={latestAudit.perfScore ?? 0}
+            seoScore={latestAudit.seoScore ?? null}
+            accessibilityScore={latestAudit.accessibilityScore ?? null}
+            bestPracticesScore={latestAudit.bestPracticesScore ?? null}
+            lighthouseVersion={latestAudit.psiApiVersion}
+            auditedAt={latestAudit.createdAt}
+            shareSlot={
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/share/${latestAudit.shareToken}`} target="_blank">
+                  <Share2 className="mr-1.5 h-3.5 w-3.5" />
+                  Compartilhar
+                </Link>
+              </Button>
+            }
+          />
 
           {/* Run history dots — newest on the right, up to 10 */}
           {historyDesc.length > 1 && (
@@ -256,6 +247,14 @@ export default async function ProjectPage({
               Auditoria Completa do Lighthouse
             </h2>
             <AuditList lighthouseRaw={latestAudit.lighthouseRaw} />
+          </section>
+
+          {/* SEO + Accessibility */}
+          <section>
+            <h2 className="mb-3 text-base font-semibold">
+              SEO e Acessibilidade
+            </h2>
+            <SEOAuditList lighthouseRaw={latestAudit.lighthouseRaw} />
           </section>
 
           <Separator />

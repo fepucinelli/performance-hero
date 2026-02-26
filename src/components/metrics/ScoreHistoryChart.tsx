@@ -22,6 +22,7 @@ import {
 interface DataPoint {
   createdAt: Date
   perfScore: number | null
+  seoScore: number | null
   lcp: number | null
   cls: number | null
   inp: number | null
@@ -36,10 +37,11 @@ interface Props {
   data: DataPoint[]
 }
 
-type Tab = "score" | "lcp" | "fcp" | "cls" | "inp"
+type Tab = "score" | "seo" | "lcp" | "fcp" | "cls" | "inp"
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "score", label: "Pontuação" },
+  { key: "score", label: "Performance" },
+  { key: "seo", label: "SEO" },
   { key: "lcp", label: "LCP" },
   { key: "fcp", label: "FCP" },
   { key: "cls", label: "CLS" },
@@ -49,6 +51,7 @@ const TABS: { key: Tab; label: string }[] = [
 // Reference lines (good / poor thresholds) per tab
 const REFS: Record<Tab, { good: number; poor: number } | null> = {
   score: { good: 90, poor: 50 },
+  seo: { good: 90, poor: 50 },
   lcp: { good: THRESHOLDS.lcp.good, poor: THRESHOLDS.lcp.poor },
   fcp: { good: THRESHOLDS.fcp.good, poor: THRESHOLDS.fcp.poor },
   cls: { good: THRESHOLDS.cls.good, poor: THRESHOLDS.cls.poor },
@@ -71,13 +74,13 @@ function formatDateWithTime(d: Date) {
 }
 
 function formatValue(tab: Tab, value: number) {
-  if (tab === "score") return `${value}`
+  if (tab === "score" || tab === "seo") return `${value}`
   if (tab === "cls") return value.toFixed(3)
   return value >= 1000 ? `${(value / 1000).toFixed(1)}s` : `${Math.round(value)}ms`
 }
 
 function yAxisFormatter(tab: Tab, v: number) {
-  if (tab === "score") return String(v)
+  if (tab === "score" || tab === "seo") return String(v)
   if (tab === "cls") return v.toFixed(2)
   return v >= 1000 ? `${(v / 1000).toFixed(0)}s` : `${v}`
 }
@@ -95,13 +98,14 @@ export function ScoreHistoryChart({ data }: Props) {
     )
   }
 
-  // Score tab has no CrUX equivalent; INP has no lab equivalent
+  // Score/SEO tabs have no CrUX equivalent; INP has no lab equivalent
   const hasLabLine = activeTab !== "inp"
-  const hasCruxLine = activeTab !== "score"
+  const hasCruxLine = activeTab !== "score" && activeTab !== "seo"
 
   const chartData = data.map((d, i) => {
     const lab: number | null =
       activeTab === "score" ? d.perfScore :
+      activeTab === "seo"   ? d.seoScore :
       activeTab === "lcp"   ? d.lcp :
       activeTab === "fcp"   ? d.fcp :
       activeTab === "cls"   ? d.cls :
@@ -112,7 +116,7 @@ export function ScoreHistoryChart({ data }: Props) {
       activeTab === "fcp" ? d.cruxFcp :
       activeTab === "cls" ? d.cruxCls :
       activeTab === "inp" ? d.cruxInp :
-      null // score has no crux equivalent
+      null // score/seo have no crux equivalent
 
     return { index: i, date: formatDate(d.createdAt), label: formatDateWithTime(d.createdAt), lab, crux }
   })
@@ -257,6 +261,11 @@ export function ScoreHistoryChart({ data }: Props) {
       {activeTab === "inp" && (
         <p className="text-xs text-muted-foreground">
           INP não tem dados de laboratório — apenas dados reais de usuários via CrUX.
+        </p>
+      )}
+      {activeTab === "seo" && (
+        <p className="text-xs text-muted-foreground">
+          Pontuação SEO do Lighthouse — meta: 90+.
         </p>
       )}
     </div>

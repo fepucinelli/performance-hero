@@ -27,13 +27,12 @@ export async function runPSIAudit(
   url: string,
   strategy: PSIStrategy
 ): Promise<PSIAuditData> {
-  const params = new URLSearchParams({
-    url,
-    strategy,
-    category: "performance",
-    // Include SEO + accessibility now — free, useful for Phase 4
-    ...(env.GOOGLE_API_KEY ? { key: env.GOOGLE_API_KEY } : {}),
-  })
+  const params = new URLSearchParams({ url, strategy })
+  params.append("category", "performance")
+  params.append("category", "seo")
+  params.append("category", "accessibility")
+  params.append("category", "best-practices")
+  if (env.GOOGLE_API_KEY) params.append("key", env.GOOGLE_API_KEY)
 
   const res = await fetch(`${PSI_ENDPOINT}?${params}`, {
     // Never serve a cached PSI response — every run must be fresh
@@ -95,6 +94,9 @@ export async function runPSIAudit(
     cruxCls: rawCruxCls !== null ? rawCruxCls / 100 : null,
     cruxInp: crux("INTERACTION_TO_NEXT_PAINT"),
     cruxFcp: crux("FIRST_CONTENTFUL_PAINT_MS"),
+    seoScore: Math.round((lhr.categories.seo?.score ?? 0) * 100),
+    accessibilityScore: Math.round((lhr.categories.accessibility?.score ?? 0) * 100),
+    bestPracticesScore: Math.round((lhr.categories["best-practices"]?.score ?? 0) * 100),
     lighthouseRaw: lhr,
     psiApiVersion: lhr.lighthouseVersion,
   }

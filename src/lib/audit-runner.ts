@@ -53,6 +53,9 @@ export async function runAuditForProject(
       lcpGrade: auditData.lcp ? gradeMetric("lcp", auditData.lcp) : null,
       clsGrade: auditData.cls ? gradeMetric("cls", auditData.cls) : null,
       inpGrade: auditData.inp ? gradeMetric("inp", auditData.inp) : null,
+      seoScore: auditData.seoScore,
+      accessibilityScore: auditData.accessibilityScore,
+      bestPracticesScore: auditData.bestPracticesScore,
       lighthouseRaw: auditData.lighthouseRaw,
       psiApiVersion: auditData.psiApiVersion,
       triggeredBy,
@@ -85,6 +88,8 @@ export async function runAuditForProject(
         fcp: result.fcp,
         ttfb: result.ttfb,
         cruxInp: result.cruxInp,
+        seoScore: result.seoScore,
+        accessibilityScore: result.accessibilityScore,
       },
       auditData.lighthouseRaw
     )
@@ -106,6 +111,8 @@ async function maybeGenerateAIActionPlan(
     fcp: number | null
     ttfb: number | null
     cruxInp: number | null
+    seoScore: number | null
+    accessibilityScore: number | null
   },
   lighthouseRaw: unknown
 ): Promise<void> {

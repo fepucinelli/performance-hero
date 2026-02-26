@@ -2,10 +2,10 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Globe, BookOpen, ListChecks, Bell } from "lucide-react"
+import { Globe, BookOpen, ListChecks, Bell, Search } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "PerfAlly — Core Web Vitals para fundadores, não engenheiros",
+  title: "PerfAlly — Auditorias profissionais de performance e SEO para desenvolvedores",
 }
 
 // Static metric examples for the hero section — intentionally a bad site
@@ -24,27 +24,27 @@ const gradeColors = {
 const features = [
   {
     icon: Globe,
-    title: "Cole qualquer URL",
+    title: "Auditorias em 10 segundos",
     description:
-      "Cole a URL do seu site e receba uma análise completa dos Core Web Vitals em menos de 10 segundos.",
+      "Cole a URL do cliente e receba um relatório completo de performance, SEO e acessibilidade em menos de 10 segundos.",
   },
   {
-    icon: BookOpen,
-    title: "Explicações sem jargão",
+    icon: Search,
+    title: "SEO + Acessibilidade incluídos",
     description:
-      "Sem termos técnicos. Cada métrica explicada em termos do impacto nos seus visitantes e no seu negócio.",
+      "Performance, SEO técnico e acessibilidade em uma única auditoria. Tudo o que você precisa para impressionar clientes.",
   },
   {
     icon: ListChecks,
-    title: "Plano de ação priorizado",
+    title: "Plano de ação por IA",
     description:
-      "Uma lista de correções ranqueadas por impacto — resolva os problemas mais importantes primeiro.",
+      "Recomendações priorizadas geradas por IA, específicas para a stack do cliente — entregue relatórios prontos.",
   },
   {
     icon: Bell,
     title: "Monitoramento automático",
     description:
-      "Agende auditorias diárias e receba alertas assim que a performance do seu site cair.",
+      "Agende auditorias diárias ou por hora. Receba alertas se a performance cair — antes que o cliente perceba.",
   },
 ]
 
@@ -58,13 +58,15 @@ export default function HomePage() {
         </Badge>
 
         <h1 className="mx-auto mb-4 max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-          Core Web Vitals para fundadores,{" "}
-          <span className="text-primary">não engenheiros</span>
+          Auditorias profissionais de performance e SEO{" "}
+          <span className="text-primary">para quem vende consultoria</span>
         </h1>
 
-        <p className="text-muted-foreground mx-auto mb-8 max-w-xl text-lg">
-          Cole sua URL. Receba um relatório de performance em linguagem simples
-          com um plano de ação priorizado. Sem configuração, sem complicação.
+        <p className="text-muted-foreground mx-auto mb-2 max-w-xl text-lg">
+          Monitore os sites dos seus clientes. Gere relatórios impressionantes. Cobre como especialista.
+        </p>
+        <p className="text-muted-foreground mx-auto mb-8 max-w-lg text-sm">
+          Você paga R$89/mês. Seus clientes te pagam R$300–1.000/mês por monitoramento.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -108,7 +110,7 @@ export default function HomePage() {
       <section className="bg-muted/30 border-t py-16">
         <div className="mx-auto max-w-5xl px-4">
           <h2 className="mb-10 text-center text-2xl font-semibold tracking-tight">
-            Tudo que você precisa para entender a performance do seu site
+            Tudo que você precisa para vender consultoria de performance
           </h2>
           <div className="grid gap-6 sm:grid-cols-2">
             {features.map((f) => (
@@ -192,8 +194,8 @@ export default function HomePage() {
               </p>
               <ul className="text-muted-foreground mb-6 space-y-1 text-left text-sm">
                 <li>✓ 1 projeto</li>
-                <li>✓ 10 auditorias manuais/mês</li>
-                <li>✓ Relatório Lighthouse completo</li>
+                <li>✓ 5 auditorias manuais/mês</li>
+                <li>✓ Performance + SEO + Acessibilidade</li>
                 <li>✓ Links de compartilhamento</li>
                 <li>✓ Plano de ação estático</li>
               </ul>
@@ -202,19 +204,20 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {/* Starter */}
+            {/* Freelancer */}
             <div className="rounded-xl border-2 border-black bg-white p-6 shadow-sm">
               <div className="mb-2 flex items-center justify-between">
-                <p className="font-semibold">Starter</p>
+                <p className="font-semibold">Freelancer</p>
                 <span className="rounded-full bg-black px-2 py-0.5 text-xs font-medium text-white">Popular</span>
               </div>
               <p className="mb-3 text-3xl font-bold">
-                R$99
+                R$89
                 <span className="text-muted-foreground text-sm font-normal">/mês</span>
               </p>
               <ul className="text-muted-foreground mb-6 space-y-1 text-left text-sm">
-                <li>✓ 5 projetos</li>
+                <li>✓ 5 projetos (clientes)</li>
                 <li>✓ Auditorias ilimitadas</li>
+                <li>✓ Performance + SEO + Acessibilidade</li>
                 <li>✓ Monitoramento diário automático</li>
                 <li>✓ Alertas por e-mail</li>
                 <li>✓ Histórico de 30 dias</li>
@@ -225,16 +228,17 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {/* Pro */}
+            {/* Studio */}
             <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <p className="mb-2 font-semibold">Pro</p>
+              <p className="mb-2 font-semibold">Studio</p>
               <p className="mb-3 text-3xl font-bold">
-                R$249
+                R$199
                 <span className="text-muted-foreground text-sm font-normal">/mês</span>
               </p>
               <ul className="text-muted-foreground mb-6 space-y-1 text-left text-sm">
-                <li>✓ 20 projetos</li>
+                <li>✓ 20 projetos (clientes)</li>
                 <li>✓ Auditorias ilimitadas</li>
+                <li>✓ Performance + SEO + Acessibilidade</li>
                 <li>✓ Monitoramento por hora automático</li>
                 <li>✓ Alertas por e-mail + Slack</li>
                 <li>✓ Relatórios em PDF</li>
@@ -250,12 +254,13 @@ export default function HomePage() {
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <p className="mb-2 font-semibold">Agência</p>
               <p className="mb-3 text-3xl font-bold">
-                R$499
+                R$449
                 <span className="text-muted-foreground text-sm font-normal">/mês</span>
               </p>
               <ul className="text-muted-foreground mb-6 space-y-1 text-left text-sm">
-                <li>✓ 100 projetos</li>
+                <li>✓ 100 projetos (clientes)</li>
                 <li>✓ Auditorias ilimitadas</li>
+                <li>✓ Performance + SEO + Acessibilidade</li>
                 <li>✓ Monitoramento por hora automático</li>
                 <li>✓ Alertas por e-mail + Slack</li>
                 <li>✓ PDFs white-label</li>

@@ -143,6 +143,11 @@ export const auditResults = pgTable(
       enum: ["good", "needs-improvement", "poor"],
     }),
 
+    // ── Additional Lighthouse category scores ────────────
+    seoScore: real("seo_score"),
+    accessibilityScore: real("accessibility_score"),
+    bestPracticesScore: real("best_practices_score"),
+
     // ── Full Lighthouse JSON ─────────────────────────────
     // Stored for action plan generation. Large (~500KB compressed).
     // Access via: audit.lighthouseRaw as LighthouseResult

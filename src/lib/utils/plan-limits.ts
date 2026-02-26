@@ -3,7 +3,7 @@ import type { PlanLimits, PlanName } from "@/types"
 export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
   free: {
     maxProjects: 1,
-    manualRunsPerMonth: 10,
+    manualRunsPerMonth: 5,
     scheduledRuns: false,
     hourlyRuns: false,
     emailAlerts: false,

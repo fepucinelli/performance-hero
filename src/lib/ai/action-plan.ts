@@ -26,6 +26,8 @@ interface MetricContext {
   fcp: number | null
   ttfb: number | null
   cruxInp: number | null
+  seoScore: number | null
+  accessibilityScore: number | null
 }
 
 function formatMs(ms: number | null): string {
@@ -62,6 +64,18 @@ function extractTopFailedAudits(lighthouseRaw: unknown): string[] {
     .map((a) => a.id)
 }
 
+function extractTopFailedSEOAudits(lighthouseRaw: unknown): string[] {
+  const raw = lighthouseRaw as LighthouseResult | null
+  if (!raw?.audits || !raw.categories.seo?.auditRefs) return []
+
+  return raw.categories.seo.auditRefs
+    .map((ref) => raw.audits[ref.id])
+    .filter((a): a is NonNullable<typeof a> => !!a && a.score !== null && a.score < 1)
+    .sort((a, b) => (a.score ?? 1) - (b.score ?? 1))
+    .slice(0, 5)
+    .map((a) => a.id)
+}
+
 export async function generateAIActionPlan(
   url: string,
   metrics: MetricContext,
@@ -72,28 +86,34 @@ export async function generateAIActionPlan(
 
   const stackPacks = extractStackPacks(lighthouseRaw)
   const topFailedAudits = extractTopFailedAudits(lighthouseRaw)
+  const topFailedSEOAudits = extractTopFailedSEOAudits(lighthouseRaw)
 
-  const systemPrompt = `Você é um especialista mundial em performance web com profundo conhecimento em Core Web Vitals (LCP, CLS, INP, FCP, TTFB) e seu impacto em métricas de negócio. Você ajuda fundadores e proprietários de negócios a entender e corrigir problemas de performance em linguagem simples e direta.`
+  const systemPrompt = `Você é um especialista mundial em performance web e SEO com profundo conhecimento em Core Web Vitals (LCP, CLS, INP, FCP, TTFB), SEO técnico e acessibilidade. Você ajuda desenvolvedores e agências a identificar e corrigir problemas para seus clientes em linguagem clara e objetiva.`
 
-  const userPrompt = `Analise o relatório de performance abaixo e gere um plano de ação priorizado.
+  const userPrompt = `Analise o relatório de performance, SEO e acessibilidade abaixo e gere um plano de ação priorizado.
 
 URL: ${url}
-Pontuação de Performance: ${metrics.perfScore ?? "N/A"}/100
 Stack detectada pelo Lighthouse: ${stackPacks}
 
-Métricas:
+Pontuações:
+- Performance: ${metrics.perfScore ?? "N/A"}/100
+- SEO: ${metrics.seoScore ?? "N/A"}/100 — meta: 90+
+- Acessibilidade: ${metrics.accessibilityScore ?? "N/A"}/100 — meta: 90+
+
+Métricas de Performance:
 - LCP (Maior Elemento Visível): ${formatMs(metrics.lcp)} — meta: < 2,5s
 - INP (Interação → Pintura, dados reais): ${formatMs(metrics.cruxInp)} — meta: < 200ms
 - CLS (Mudança de Layout): ${formatCls(metrics.cls)} — meta: < 0,1
 - FCP (Primeira Pintura de Conteúdo): ${formatMs(metrics.fcp)} — meta: < 1,8s
 - TTFB (Tempo até Primeiro Byte): ${formatMs(metrics.ttfb)} — meta: < 800ms
 
-Principais problemas detectados pelo Lighthouse: ${topFailedAudits.length > 0 ? topFailedAudits.join(", ") : "nenhum crítico identificado"}
+Principais problemas de performance: ${topFailedAudits.length > 0 ? topFailedAudits.join(", ") : "nenhum crítico identificado"}
+Principais problemas de SEO: ${topFailedSEOAudits.length > 0 ? topFailedSEOAudits.join(", ") : "nenhum crítico identificado"}
 
 Instruções:
 - Escreva em português brasileiro
-- Use linguagem simples para um fundador não-técnico — sem jargão de programação
-- Gere entre 3 e 5 recomendações priorizadas pelo maior impacto
+- Use linguagem direta para desenvolvedores e agências — pode usar termos técnicos mas seja objetivo
+- Gere entre 3 e 6 recomendações priorizadas pelo maior impacto (inclua problemas de SEO se pontuação < 90)
 - Cada recomendação deve ter no máximo 60 palavras no campo "action"
 - Se a stack foi detectada (ex: Next.js, WordPress), inclua uma dica específica para essa tecnologia no campo "stackTip"
 - Foque nos problemas reais detectados, não em conselhos genéricos

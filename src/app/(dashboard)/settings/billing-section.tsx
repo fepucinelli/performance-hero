@@ -20,11 +20,12 @@ interface PlanOption {
 const PLANS: PlanOption[] = [
   {
     key: "starter",
-    name: "Starter",
-    price: 99,
+    name: "Freelancer",
+    price: 89,
     features: [
-      "5 projetos",
+      "5 projetos (clientes)",
       "Auditorias ilimitadas",
+      "Auditorias de SEO e Acessibilidade",
       "Monitoramento diário automático",
       "Alertas por e-mail",
       "Histórico de 30 dias",
@@ -33,11 +34,12 @@ const PLANS: PlanOption[] = [
   },
   {
     key: "pro",
-    name: "Pro",
-    price: 249,
+    name: "Studio",
+    price: 199,
     features: [
-      "20 projetos",
+      "20 projetos (clientes)",
       "Auditorias ilimitadas",
+      "Auditorias de SEO e Acessibilidade",
       "Monitoramento por hora automático",
       "Alertas e-mail + Slack",
       "Relatórios em PDF",
@@ -48,10 +50,11 @@ const PLANS: PlanOption[] = [
   {
     key: "agency",
     name: "Agência",
-    price: 499,
+    price: 449,
     features: [
-      "100 projetos",
+      "100 projetos (clientes)",
       "Auditorias ilimitadas",
+      "Auditorias de SEO e Acessibilidade",
       "Monitoramento por hora automático",
       "Alertas e-mail + Slack",
       "PDFs white-label",

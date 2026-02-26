@@ -67,9 +67,19 @@ export interface PSIAuditData {
   cruxCls: number | null
   cruxInp: number | null
   cruxFcp: number | null
+  // Additional Lighthouse category scores
+  seoScore: number
+  accessibilityScore: number
+  bestPracticesScore: number
   // Full lighthouse response for action plan extraction
   lighthouseRaw: LighthouseResult
   psiApiVersion: string
+}
+
+export interface AuditRef {
+  id: string
+  weight: number
+  group?: string
 }
 
 // Minimal type for what we access from the Lighthouse result.
@@ -77,10 +87,10 @@ export interface PSIAuditData {
 export interface LighthouseResult {
   lighthouseVersion: string
   categories: {
-    performance: { score: number }
-    seo?: { score: number }
-    accessibility?: { score: number }
-    "best-practices"?: { score: number }
+    performance: { score: number; auditRefs?: AuditRef[] }
+    seo?: { score: number; auditRefs?: AuditRef[] }
+    accessibility?: { score: number; auditRefs?: AuditRef[] }
+    "best-practices"?: { score: number; auditRefs?: AuditRef[] }
   }
   audits: Record<string, LighthouseAudit>
   stackPacks?: Array<{ id: string; title: string }>

@@ -9,10 +9,11 @@ import { eq } from "drizzle-orm"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ScoreGauge } from "@/components/metrics/ScoreGauge"
 import { MetricCard } from "@/components/metrics/MetricCard"
 import { ActionPlan } from "@/components/metrics/ActionPlan"
 import { AuditList } from "@/components/metrics/AuditList"
+import { SEOAuditList } from "@/components/metrics/SEOAuditList"
+import { SiteHealthCard } from "@/components/metrics/SiteHealthCard"
 import { Globe, Zap } from "lucide-react"
 import { formatDate } from "@/lib/utils/date"
 import type { AIActionItem } from "@/types"
@@ -98,18 +99,17 @@ export default async function SharePage({
             </div>
           </div>
 
-          <Separator className="my-4" />
-
-          <div className="flex items-center gap-6">
-            <ScoreGauge score={audit.perfScore ?? 0} size="lg" />
-            <div>
-              <p className="font-semibold">Pontuação de Performance</p>
-              <p className="text-muted-foreground text-sm">
-                Lighthouse {audit.psiApiVersion ?? "audit"} · Dados de laboratório
-              </p>
-            </div>
-          </div>
         </div>
+
+        {/* Site Health */}
+        <SiteHealthCard
+          perfScore={audit.perfScore ?? 0}
+          seoScore={audit.seoScore ?? null}
+          accessibilityScore={audit.accessibilityScore ?? null}
+          bestPracticesScore={audit.bestPracticesScore ?? null}
+          lighthouseVersion={audit.psiApiVersion}
+          auditedAt={audit.createdAt}
+        />
 
         {/* Core Web Vitals */}
         <section>
@@ -153,6 +153,12 @@ export default async function SharePage({
 
         {/* Full audit */}
         <AuditList lighthouseRaw={audit.lighthouseRaw} />
+
+        {/* SEO + Accessibility */}
+        <section>
+          <h2 className="mb-3 text-base font-semibold">SEO e Acessibilidade</h2>
+          <SEOAuditList lighthouseRaw={audit.lighthouseRaw} />
+        </section>
 
         {/* CTA */}
         <div className="rounded-xl border bg-black p-6 text-center text-white">
