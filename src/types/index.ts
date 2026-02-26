@@ -76,6 +76,29 @@ export interface PSIAuditData {
   psiApiVersion: string
 }
 
+// ─── CrUX History API ────────────────────────────────────────────────────────
+// 25-week weekly P75 field data from the Chrome UX Report History API.
+// Null entries = insufficient traffic for that week.
+
+export interface CrUXHistoryPeriod {
+  firstDate: { year: number; month: number; day: number }
+  lastDate: { year: number; month: number; day: number }
+}
+
+export interface CrUXHistoryMetric {
+  percentilesTimeseries: { p75s: (number | null)[] }
+}
+
+export interface CrUXHistoryRecord {
+  collectionPeriods: CrUXHistoryPeriod[]
+  metrics: {
+    largest_contentful_paint?: CrUXHistoryMetric
+    cumulative_layout_shift?: CrUXHistoryMetric
+    interaction_to_next_paint?: CrUXHistoryMetric
+    first_contentful_paint?: CrUXHistoryMetric
+  }
+}
+
 export interface AuditRef {
   id: string
   weight: number

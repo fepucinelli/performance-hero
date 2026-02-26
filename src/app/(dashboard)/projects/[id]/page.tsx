@@ -22,7 +22,7 @@ import { AlertThresholds } from "@/components/projects/AlertThresholds"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
 import { getMonthlyRunCount } from "@/app/actions/projects"
 import type { Plan } from "@/lib/db/schema"
-import type { AIActionItem } from "@/types"
+import type { AIActionItem, CrUXHistoryRecord } from "@/types"
 
 export async function generateMetadata({
   params,
@@ -222,7 +222,10 @@ export default async function ProjectPage({
           {/* Performance Trend */}
           <section>
             <h2 className="mb-3 text-base font-semibold">Evolução da Performance</h2>
-            <ScoreHistoryChart data={history} />
+            <ScoreHistoryChart
+              data={history}
+              cruxHistory={latestAudit.cruxHistoryRaw as CrUXHistoryRecord | null}
+            />
           </section>
 
           <Separator />

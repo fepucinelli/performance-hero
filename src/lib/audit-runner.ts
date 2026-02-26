@@ -7,6 +7,7 @@
 import { db, projects, auditResults, users } from "@/lib/db"
 import { eq, and, gte, isNotNull, count } from "drizzle-orm"
 import { runPSIAudit, PSIError } from "@/lib/api/pagespeed"
+import { fetchCrUXHistory } from "@/lib/api/crux-history"
 import { gradeMetric } from "@/lib/utils/metrics"
 import { checkAndFireAlerts } from "@/lib/alerts"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
@@ -68,6 +69,15 @@ export async function runAuditForProject(
     .update(projects)
     .set({ lastAuditAt: new Date(), updatedAt: new Date() })
     .where(eq(projects.id, project.id))
+
+  // Fetch CrUX History (25-week real-user data) — fire-and-forget
+  void fetchCrUXHistory(project.url).then((cruxHistory) => {
+    if (!cruxHistory) return
+    return db
+      .update(auditResults)
+      .set({ cruxHistoryRaw: cruxHistory })
+      .where(eq(auditResults.id, result.id))
+  }).catch(() => {})
 
   // Fire alerts if any thresholds are breached (no-op if none configured)
   await checkAndFireAlerts(

@@ -156,6 +156,10 @@ export const auditResults = pgTable(
     // AI-generated action plan (cached, null = not yet generated)
     aiActionPlan: jsonb("ai_action_plan"),
 
+    // CrUX History API snapshot — 25 weeks of weekly P75 real-user data
+    // null = URL not in CrUX dataset or API not enabled
+    cruxHistoryRaw: jsonb("crux_history_raw"),
+
     // Token for public share links (e.g. /share/abc123)
     shareToken: text("share_token")
       .notNull()
