@@ -107,6 +107,20 @@ function AIActionItemCard({ item, index }: { item: AIActionItem; index: number }
           {/* Action */}
           <p className="text-muted-foreground text-sm leading-relaxed">{item.action}</p>
 
+          {/* Implementation steps */}
+          {item.steps && item.steps.length > 0 && (
+            <ol className="space-y-1 pl-1">
+              {item.steps.map((step, si) => (
+                <li key={si} className="flex gap-2 text-sm">
+                  <span className="text-muted-foreground shrink-0 font-mono text-xs leading-5">
+                    {si + 1}.
+                  </span>
+                  <span className="text-foreground/80 leading-snug">{step}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+
           {/* Why it matters */}
           <p className="text-xs font-medium text-green-700">{item.why}</p>
 

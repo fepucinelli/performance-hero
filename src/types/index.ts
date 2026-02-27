@@ -48,6 +48,8 @@ export type PlanName = "free" | "starter" | "pro" | "agency"
 export interface AIActionItem {
   title: string
   action: string
+  /** Ordered implementation steps — commands, code snippets, specific actions */
+  steps?: string[]
   why: string
   difficulty: "Fácil" | "Médio" | "Difícil"
   stackTip?: string

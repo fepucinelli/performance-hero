@@ -1060,6 +1060,30 @@ function ActionPlanPage({
                   </View>
                 </View>
                 <Text style={styles.actionText}>{item.action}</Text>
+                {item.steps && item.steps.length > 0 && (
+                  <View style={{ marginTop: 4 }}>
+                    {item.steps.map((step, si) => (
+                      <View
+                        key={si}
+                        style={{ flexDirection: "row", marginBottom: 2 }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 8,
+                            color: "#374151",
+                            marginRight: 4,
+                            minWidth: 12,
+                          }}
+                        >
+                          {si + 1}.
+                        </Text>
+                        <Text style={{ fontSize: 8, color: "#374151", flex: 1 }}>
+                          {step}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
                 <Text style={styles.actionWhy}>{item.why}</Text>
                 {item.stackTip && (
                   <Text

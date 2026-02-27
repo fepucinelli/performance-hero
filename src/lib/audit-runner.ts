@@ -167,7 +167,7 @@ async function maybeGenerateAIActionPlan(
     if (usedThisMonth >= planLimits.aiActionPlansPerMonth) return
   }
 
-  const aiPlan = await generateAIActionPlan(url, metrics, lighthouseRaw)
+  const aiPlan = await generateAIActionPlan(url, metrics, lighthouseRaw, plan)
   if (!aiPlan) return
 
   await db
