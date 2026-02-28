@@ -10,7 +10,7 @@ Each phase is independently shippable and designed to deliver value before the n
 Phase 0 — Foundation  ✅  Infrastructure, auth, DB, CI/CD
 Phase 1 — MVP         ✅  Core audit product, free tier live
 Phase 2 — Pro         ✅  Paid plans, monitoring, AI, SEO audits, multi-page
-Phase 3 — Agency          PDF reports, white-label, teams
+Phase 3 — Agency      ✅  PDF reports, white-label branding, Clerk Organizations teams
 Phase 4 — Growth          Integrations, virality, competitor analysis
 Phase 5 — Scale           Public API, plugins, advanced auditing
 ```
@@ -130,28 +130,37 @@ Phase 5 — Scale           Public API, plugins, advanced auditing
 
 ---
 
-## Phase 3 — Agency
+## Phase 3 — Agency ✅
 
 **Goal:** Unlock the highest-value customer segment — agencies managing multiple client sites at R$449/mês.
 
-### PDF Reports
-- [ ] Executive summary page (composite score, grade, key findings)
-- [ ] Per-metric section with explanation and recommendations
-- [ ] Full action plan table with difficulty ratings
-- [ ] Download from project page (Studio + Agência plans)
+### PDF Reports ✅
+- [x] Executive summary page (composite score, grade, key findings)
+- [x] Per-metric section (Core Web Vitals with lab + field values, explanations)
+- [x] Full action plan — AI-generated or static fallback with difficulty ratings
+- [x] SEO + Accessibility failing audit section
+- [x] Multi-page summary table (when project has multiple pages)
+- [x] Download from project page (Studio + Agência plans)
+- [x] Report history — list of past generated PDFs with download links (project page)
+- [x] PDFs saved to Vercel Blob; `reports` table records each generation
 
-### White-Label (Agência plan only)
-- [ ] Custom agency logo upload (Vercel Blob)
-- [ ] Custom accent color for the PDF
-- [ ] Custom footer (agency name, contact info, website)
+### White-Label (Agência plan only) ✅
+- [x] Custom agency logo upload — Vercel Blob (production) / `public/uploads/` (local dev)
+- [x] Custom accent color for every page's top bar
+- [x] Custom agency name in header and page footer
+- [x] Custom contact info in cover page footer
+- [x] Branding settings UI at Settings → Marca da Agência (visible to Agency plan users only)
+- [x] Logo rendered on PDF cover page using `@react-pdf/renderer`'s `<Image>` component
 
-### Multi-User Teams (Clerk Organizations)
-- [ ] Invite team members to an organization
-- [ ] Roles: Owner, Member
-- [ ] Billing tied to the Organization, not the individual
-- [ ] Projects scoped to org (`org_id` column already on `projects` table)
+### Multi-User Teams (Clerk Organizations) ✅
+- [x] Clerk Organizations enabled (manual step: Clerk Dashboard → Settings → Organizations)
+- [x] `OrganizationSwitcher` in dashboard header (Agency plan users only)
+- [x] Org-scoped project queries — projects scoped to active org or personal workspace
+- [x] `org_id` set on project creation when an org session is active
+- [x] Org-aware ownership checks across all routes and server actions
+- [x] `getUserPlan` shared helper for clean plan lookups
 
-### Agency Productivity
+### Not yet implemented (deferred to Phase 4)
 - [ ] Project tags / grouping by client
 - [ ] Bulk audit trigger (run all projects at once)
 - [ ] Weekly digest email: performance summary across all monitored sites

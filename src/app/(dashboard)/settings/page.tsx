@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { BillingSection } from "./billing-section"
+import { BrandingSection } from "./branding-section"
 import type { Plan } from "@/lib/db/schema"
 
 export const metadata: Metadata = {
@@ -22,7 +23,15 @@ export default async function SettingsPage() {
   const dbUser = userId
     ? await db.query.users.findFirst({
         where: eq(users.id, userId),
-        columns: { plan: true, stripeCustomerId: true, planExpiresAt: true },
+        columns: {
+          plan: true,
+          stripeCustomerId: true,
+          planExpiresAt: true,
+          agencyName: true,
+          agencyContact: true,
+          agencyAccentColor: true,
+          agencyLogoUrl: true,
+        },
       })
     : null
 
@@ -78,6 +87,18 @@ export default async function SettingsPage() {
 
       {/* Billing */}
       <BillingSection plan={plan} hasStripeCustomer={hasStripeCustomer} />
+
+      {/* Branding (Agency plan only) */}
+      {plan === "agency" && (
+        <BrandingSection
+          initial={{
+            agencyName: dbUser?.agencyName ?? null,
+            agencyContact: dbUser?.agencyContact ?? null,
+            agencyAccentColor: dbUser?.agencyAccentColor ?? null,
+            agencyLogoUrl: dbUser?.agencyLogoUrl ?? null,
+          }}
+        />
+      )}
     </div>
   )
 }

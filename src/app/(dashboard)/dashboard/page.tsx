@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { db, projects, auditResults } from "@/lib/db"
-import { eq, desc, inArray } from "drizzle-orm"
+import { eq, and, desc, inArray, isNull } from "drizzle-orm"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScoreGauge } from "@/components/metrics/ScoreGauge"
@@ -20,14 +20,16 @@ export const metadata: Metadata = {
 }
 
 export default async function DashboardPage() {
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   const user = await currentUser()
   const firstName = user?.firstName ?? "there"
 
-  // Fetch all user projects
+  // Fetch projects scoped to org (if active) or personal workspace
   const userProjects = userId
     ? await db.query.projects.findMany({
-        where: eq(projects.userId, userId),
+        where: orgId
+          ? eq(projects.orgId, orgId)
+          : and(eq(projects.userId, userId), isNull(projects.orgId)),
         orderBy: [desc(projects.createdAt)],
       })
     : []

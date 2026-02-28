@@ -39,6 +39,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local dev uploads (replaced by Vercel Blob in production)
+/public/uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

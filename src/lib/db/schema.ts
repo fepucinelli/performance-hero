@@ -39,6 +39,12 @@ export const users = pgTable("users", {
     .default("free"),
   planExpiresAt: timestamptz("plan_expires_at"),
 
+  // White-label branding (Phase 3 — Agency plan only)
+  agencyName: text("agency_name"),
+  agencyContact: text("agency_contact"),
+  agencyAccentColor: text("agency_accent_color"), // hex string e.g. "#6366f1"
+  agencyLogoUrl: text("agency_logo_url"),         // Vercel Blob URL
+
   createdAt: timestamptz("created_at")
     .notNull()
     .default(sql`NOW()`),

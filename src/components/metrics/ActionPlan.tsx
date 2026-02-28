@@ -13,7 +13,7 @@ function InlineCode({ text }: { text: string }) {
         i % 2 === 1 ? (
           <code
             key={i}
-            className="rounded bg-muted px-1 py-0.5 font-mono text-[0.8em] text-foreground"
+            className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.8em] text-slate-700 ring-1 ring-slate-200"
           >
             {part}
           </code>

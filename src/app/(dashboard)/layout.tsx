@@ -1,18 +1,25 @@
 import { Sidebar } from "@/components/layout/sidebar"
 import { UserMenu } from "@/components/layout/user-menu"
+import { auth } from "@clerk/nextjs/server"
+import { getUserPlan } from "@/lib/utils/get-plan"
+import { OrgSwitcher } from "@/components/layout/org-switcher"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { userId } = await auth()
+  const plan = userId ? await getUserPlan(userId) : "free"
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="border-border/40 flex h-14 shrink-0 items-center justify-end border-b bg-white px-4">
+        <header className="border-border/40 flex h-14 shrink-0 items-center justify-end gap-3 border-b bg-white px-4">
+          {plan === "agency" && <OrgSwitcher />}
           <UserMenu />
         </header>
 

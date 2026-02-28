@@ -226,7 +226,8 @@ Regras absolutas:
 - NUNCA dê conselhos genéricos como "otimize suas imagens" sem especificar quais
 - Cada passo deve ser algo que o desenvolvedor pode executar agora
 - Inclua comandos, configurações ou trechos de código quando relevante
-- Escreva em português brasileiro, linguagem técnica e direta`
+- Escreva em português brasileiro, linguagem técnica e direta
+- FORMATAÇÃO: envolva qualquer nome de arquivo, função, propriedade, comando ou trecho de código em backticks (\`assim\`). Exemplos: \`next.config.js\`, \`loading="lazy"\`, \`window.addEventListener\`, \`npm run build\``
 
   const userPrompt = `Analise os dados de performance abaixo e gere um plano de ação preciso e acionável.
 
@@ -256,8 +257,9 @@ INSTRUÇÕES:
 - Para cada recomendação, inclua "steps": array com 3 a 5 passos concretos de implementação
   - Os steps devem referenciar arquivos/URLs reais dos dados acima quando disponíveis
   - Podem incluir comandos de terminal, configurações ou trechos de código curtos
-- O campo "action" deve resumir o problema e a solução em até 2 frases
-- Se a stack foi detectada (ex: Next.js, WordPress), inclua stackTip com instrução específica
+  - Use backticks para qualquer código inline: ex. "Adicione \`loading=\\"lazy\\"\` na tag \`<img>\`"
+- O campo "action" deve resumir o problema e a solução em até 2 frases; use backticks para termos técnicos
+- Se a stack foi detectada (ex: Next.js, WordPress), inclua stackTip com instrução específica e use backticks para nomes de arquivos/propriedades
 
 Retorne APENAS um array JSON válido sem markdown, sem texto extra:
 [

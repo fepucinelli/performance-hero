@@ -9,24 +9,42 @@ import { AuditReportPDF } from "@/lib/pdf/AuditReport"
 import type { PageEntry } from "@/lib/pdf/AuditReport"
 import type { Plan } from "@/lib/db/schema"
 
+/** Resolve a possibly-relative URL to absolute using the incoming request's origin. */
+function absoluteUrl(url: string | null | undefined, origin: string): string | null {
+  if (!url) return null
+  if (url.startsWith("http://") || url.startsWith("https://")) return url
+  return `${origin}${url.startsWith("/") ? "" : "/"}${url}`
+}
+
 export async function POST(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const { userId } = await auth()
+  const origin = new URL(_req.url).origin
+  const { userId, orgId } = await auth()
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // Ownership check
+  // Ownership check (org-aware)
+  const ownershipFilter = orgId
+    ? and(eq(projects.id, id), eq(projects.orgId, orgId))
+    : and(eq(projects.id, id), eq(projects.userId, userId))
+
   const project = await db.query.projects.findFirst({
-    where: and(eq(projects.id, id), eq(projects.userId, userId)),
+    where: ownershipFilter,
   })
   if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  // Plan check
+  // Plan check + fetch branding
   const dbUser = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: { plan: true },
+    columns: {
+      plan: true,
+      agencyName: true,
+      agencyContact: true,
+      agencyAccentColor: true,
+      agencyLogoUrl: true,
+    },
   })
   const plan = (dbUser?.plan ?? "free") as Plan
   if (!PLAN_LIMITS[plan].pdfReports) {
@@ -90,7 +108,16 @@ export async function POST(
         strategy: project.strategy,
       }}
       pages={pageEntries}
-      // branding: future Phase 3 white-label — omitted for now
+      branding={
+        plan === "agency"
+          ? {
+              agencyName: dbUser?.agencyName ?? null,
+              agencyContact: dbUser?.agencyContact ?? null,
+              accentColor: dbUser?.agencyAccentColor ?? null,
+              agencyLogoUrl: absoluteUrl(dbUser?.agencyLogoUrl, origin),
+            }
+          : null
+      }
     />
   )
 

@@ -128,6 +128,14 @@ ClerkProvider (root layout)
 
 > **Note:** Next.js 16 uses `proxy.ts` as the Clerk middleware file, not `middleware.ts`. The middleware is exported as `clerkMiddleware` from `@clerk/nextjs/server`.
 
+**Organizations (Phase 3 — Agency plan):**
+Clerk Organizations are used for multi-user teams. Enable via Clerk Dashboard → Settings → Organizations.
+
+- `orgId` is available from `auth()` alongside `userId`
+- All ownership queries check `orgId` (if active) or fall back to `userId` with `isNull(projects.org_id)`
+- The `OrganizationSwitcher` component is shown in the dashboard header for Agency plan users only
+- Creating an org is available to all Agency users; non-Agency users see only the personal workspace
+
 ---
 
 ## Background Jobs: Upstash QStash
@@ -224,7 +232,7 @@ Puppeteer requires a full Chromium install. Vercel Functions don't support it (b
 **Pattern:**
 ```tsx
 // src/lib/pdf/AuditReport.tsx
-import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 
 export function AuditReportPDF({ audit, project, branding }: Props) {
   return (
@@ -235,7 +243,27 @@ export function AuditReportPDF({ audit, project, branding }: Props) {
 }
 ```
 
-Generated PDFs are uploaded to Vercel Blob storage. The URL is saved in the `reports` table and returned to the user for download. White-label PDFs (Agency plan) accept a custom logo, accent color, and footer.
+Generated PDFs are uploaded to Vercel Blob storage. The URL is saved in the `reports` table and returned to the user for download.
+
+**White-label branding (Agency plan):**
+The `branding` prop accepts:
+- `agencyLogoUrl` — remote image URL rendered on the cover page using `<Image>`
+- `agencyName` — shown above the report title and in the page footer
+- `agencyContact` — shown in the cover page footer (replaces "perfally.com")
+- `accentColor` — hex string applied as the top accent bar color on every page
+
+**Important: logo URLs must be absolute.** `@react-pdf/renderer` fetches images in the Node.js API route context, where relative paths like `/uploads/logos/…` cannot resolve. The reports route converts any relative `agencyLogoUrl` to an absolute URL using the incoming request's origin before passing it to the PDF component:
+
+```typescript
+function absoluteUrl(url: string | null | undefined, origin: string): string | null {
+  if (!url) return null
+  if (url.startsWith("http://") || url.startsWith("https://")) return url
+  return `${origin}${url.startsWith("/") ? "" : "/"}${url}`
+}
+```
+
+**Local dev fallback for logo uploads:**
+When `BLOB_READ_WRITE_TOKEN` is not set, logos are saved to `public/uploads/logos/{userId}/` and served at `/uploads/logos/…`. These paths are gitignored. The absolute URL conversion above makes them work in local PDF generation. In production, Vercel Blob always returns absolute `https://…` URLs.
 
 ---
 
@@ -324,6 +352,11 @@ users (
   stripe_customer_id TEXT UNIQUE,
   plan               TEXT DEFAULT 'free',    -- free | starter | pro | agency
   plan_expires_at    TIMESTAMPTZ,
+  -- White-label branding (Agency plan only)
+  agency_name          TEXT,
+  agency_contact       TEXT,
+  agency_accent_color  TEXT,                    -- hex string e.g. "#6366f1"
+  agency_logo_url      TEXT,                    -- Vercel Blob URL (or local /uploads/… in dev)
   created_at         TIMESTAMPTZ DEFAULT NOW(),
   updated_at         TIMESTAMPTZ DEFAULT NOW()
 )
@@ -447,7 +480,7 @@ Plan limits are defined in `src/lib/utils/plan-limits.ts` as a `PLAN_LIMITS` con
 | `historyDays` | Date filter on history queries (not row limit) |
 | `aiActionPlansPerMonth` | `maybeGenerateAIActionPlan` in `audit-runner.ts` |
 | `scheduledRuns` / `hourlyRuns` | Schedule selector UI + cron trigger handler |
-| `pdfReports` | PDF download button + PDF generation route |
+| `pdfReports` | PDF route + download button + ReportHistory component |
 
 Upstash Redis is available for sliding-window rate limits on high-frequency endpoints (e.g. the public `/check` analyzer in Phase 4).
 
@@ -468,7 +501,7 @@ The static plan is a safety net — the product is never left without recommenda
 
 - All PSI calls happen server-side — `GOOGLE_API_KEY` never exposed to the client
 - Clerk middleware protects all `/dashboard` routes via `proxy.ts`
-- Project and page ownership verified on every API call (`WHERE user_id = currentUser.id`)
+- Project and page ownership verified on every API call — org-aware: checks `org_id` when an org session is active, otherwise checks `user_id` with `IS NULL` guard on `org_id`
 - Stripe webhooks verified with `stripe.webhooks.constructEvent`
 - No user-provided HTML rendered unsanitized
 - URL validation before PSI call (reject localhost, private IPs, non-HTTP schemes)

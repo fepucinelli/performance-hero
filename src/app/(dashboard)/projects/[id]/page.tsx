@@ -3,8 +3,8 @@ export const dynamic = "force-dynamic"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
-import { db, projects, auditResults, users, projectPages } from "@/lib/db"
-import { eq, and, desc, gte, isNull } from "drizzle-orm"
+import { db, projects, auditResults, users, projectPages, reports } from "@/lib/db"
+import { eq, and, desc, gte, isNull, or } from "drizzle-orm"
 import { sql } from "drizzle-orm"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ import { SiteHealthCard } from "@/components/metrics/SiteHealthCard"
 import { RunAuditButton } from "@/components/metrics/RunAuditButton"
 import { ChevronLeft, Share2, Globe } from "lucide-react"
 import { DownloadPDFButton } from "@/components/projects/DownloadPDFButton"
+import { ReportHistory } from "@/components/projects/ReportHistory"
 import { ScoreHistoryChart } from "@/components/metrics/ScoreHistoryChart"
 import { DiagnosticsGrid } from "@/components/metrics/DiagnosticsGrid"
 import { FilmstripViewer } from "@/components/metrics/FilmstripViewer"
@@ -35,11 +36,15 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) return {}
 
+  const ownershipFilter = orgId
+    ? and(eq(projects.id, id), eq(projects.orgId, orgId))
+    : and(eq(projects.id, id), eq(projects.userId, userId))
+
   const project = await db.query.projects.findFirst({
-    where: and(eq(projects.id, id), eq(projects.userId, userId)),
+    where: ownershipFilter,
     columns: { name: true },
   })
 
@@ -55,11 +60,15 @@ export default async function ProjectPage({
 }) {
   const { id } = await params
   const { page: pageParam } = await searchParams
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) notFound()
 
+  const ownershipFilter = orgId
+    ? and(eq(projects.id, id), eq(projects.orgId, orgId))
+    : and(eq(projects.id, id), eq(projects.userId, userId))
+
   const project = await db.query.projects.findFirst({
-    where: and(eq(projects.id, id), eq(projects.userId, userId)),
+    where: ownershipFilter,
   })
   if (!project) notFound()
 
@@ -111,8 +120,8 @@ export default async function ProjectPage({
   const historyStart = new Date()
   historyStart.setDate(historyStart.getDate() - planLimits.historyDays)
 
-  // Fetch latest audit, history, and monthly run count in parallel
-  const [latestAudit, historyDesc, monthlyRunCount] = await Promise.all([
+  // Fetch latest audit, history, monthly run count, and report history in parallel
+  const [latestAudit, historyDesc, monthlyRunCount, projectReports] = await Promise.all([
     db.query.auditResults.findFirst({
       where: and(
         eq(auditResults.projectId, project.id),
@@ -146,6 +155,14 @@ export default async function ProjectPage({
     planLimits.manualRunsPerMonth !== -1
       ? getMonthlyRunCount(userId)
       : Promise.resolve(-1),
+    planLimits.pdfReports
+      ? db.query.reports.findMany({
+          where: eq(reports.projectId, project.id),
+          orderBy: [desc(reports.createdAt)],
+          limit: 10,
+          columns: { id: true, blobUrl: true, createdAt: true },
+        })
+      : Promise.resolve([]),
   ])
   const history = [...historyDesc].reverse()
 
@@ -375,6 +392,20 @@ export default async function ProjectPage({
               hasEmailAlerts={planLimits.emailAlerts}
             />
           </section>
+
+          {/* Report history (PDF plan only) */}
+          {planLimits.pdfReports && (
+            <>
+              <Separator />
+              <section>
+                <h2 className="mb-1 text-base font-semibold">Relatórios Gerados</h2>
+                <p className="text-muted-foreground mb-3 text-sm">
+                  PDFs gerados anteriormente para este projeto.
+                </p>
+                <ReportHistory reports={projectReports} />
+              </section>
+            </>
+          )}
         </>
       ) : (
         /* No audit yet */

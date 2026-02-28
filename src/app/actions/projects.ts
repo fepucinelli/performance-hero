@@ -3,7 +3,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { db, projects, users, auditResults, projectPages } from "@/lib/db"
-import { eq, and, count, gte } from "drizzle-orm"
+import { eq, and, count, gte, isNull } from "drizzle-orm"
 import { validateAuditUrl } from "@/lib/utils/validate-url"
 import { PLAN_LIMITS } from "@/lib/utils/plan-limits"
 import { z } from "zod"
@@ -24,7 +24,7 @@ export async function createProjectAction(
   _prevState: CreateProjectState,
   formData: FormData
 ): Promise<CreateProjectState> {
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) redirect("/sign-in")
 
   const raw = {
@@ -69,7 +69,11 @@ export async function createProjectAction(
   const countResult = await db
     .select({ value: count() })
     .from(projects)
-    .where(eq(projects.userId, userId))
+    .where(
+      orgId
+        ? eq(projects.orgId, orgId)
+        : and(eq(projects.userId, userId), isNull(projects.orgId))
+    )
 
   const projectCount = countResult[0]?.value ?? 0
 
@@ -88,6 +92,7 @@ export async function createProjectAction(
     .insert(projects)
     .values({
       userId,
+      orgId: orgId ?? null,
       url,
       name,
       strategy: parsed.data.strategy as "mobile" | "desktop",
@@ -106,12 +111,14 @@ export async function createProjectAction(
 }
 
 export async function deleteProjectAction(projectId: string): Promise<void> {
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) redirect("/sign-in")
 
-  await db
-    .delete(projects)
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+  const ownershipFilter = orgId
+    ? and(eq(projects.id, projectId), eq(projects.orgId, orgId))
+    : and(eq(projects.id, projectId), eq(projects.userId, userId))
+
+  await db.delete(projects).where(ownershipFilter)
 
   redirect("/dashboard")
 }
@@ -148,12 +155,16 @@ export async function addPageAction(
   url: string,
   label?: string
 ): Promise<AddPageState> {
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) return { error: "Não autenticado" }
 
   // Verify ownership
+  const ownershipFilter = orgId
+    ? and(eq(projects.id, projectId), eq(projects.orgId, orgId))
+    : and(eq(projects.id, projectId), eq(projects.userId, userId))
+
   const project = await db.query.projects.findFirst({
-    where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
+    where: ownershipFilter,
     columns: { id: true, url: true },
   })
   if (!project) return { error: "Projeto não encontrado" }
@@ -207,12 +218,16 @@ export async function removePageAction(
   projectId: string,
   pageId: string
 ): Promise<RemovePageState> {
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) return { error: "Não autenticado" }
 
   // Verify project ownership
+  const ownershipFilter = orgId
+    ? and(eq(projects.id, projectId), eq(projects.orgId, orgId))
+    : and(eq(projects.id, projectId), eq(projects.userId, userId))
+
   const project = await db.query.projects.findFirst({
-    where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
+    where: ownershipFilter,
     columns: { id: true },
   })
   if (!project) return { error: "Projeto não encontrado" }

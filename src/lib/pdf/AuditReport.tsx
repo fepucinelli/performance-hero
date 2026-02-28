@@ -12,6 +12,7 @@ import {
   View,
   StyleSheet,
   Link,
+  Image,
 } from "@react-pdf/renderer"
 import { gradeMetric, gradeScore, formatMetricValue, GRADE_LABELS } from "@/lib/utils/metrics"
 import { getActionPlan } from "@/lib/utils/explanations"
@@ -49,6 +50,7 @@ interface Branding {
   accentColor?: string | null
   agencyName?: string | null
   agencyContact?: string | null
+  agencyLogoUrl?: string | null
 }
 
 export interface ReportProps {
@@ -489,6 +491,12 @@ function ProjectCoverPage({
     <Page size="A4" style={styles.page}>
       <View style={[styles.coverAccentBar, { backgroundColor: accent }]} />
 
+      {branding?.agencyLogoUrl && (
+        <Image
+          src={branding.agencyLogoUrl}
+          style={{ width: 80, marginBottom: 8 }}
+        />
+      )}
       {branding?.agencyName && (
         <Text style={{ fontSize: 11, color: "#6b7280", marginBottom: 16 }}>
           {branding.agencyName}
@@ -706,6 +714,12 @@ function CoverSummaryPage({
     <Page size="A4" style={styles.page}>
       <View style={[styles.coverAccentBar, { backgroundColor: accent }]} />
       {pageLabel && <PageSectionBadge label={pageLabel} />}
+      {branding?.agencyLogoUrl && (
+        <Image
+          src={branding.agencyLogoUrl}
+          style={{ width: 80, marginBottom: 8 }}
+        />
+      )}
       {branding?.agencyName && (
         <Text style={{ fontSize: 11, color: "#6b7280", marginBottom: 16 }}>
           {branding.agencyName}

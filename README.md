@@ -27,7 +27,7 @@ Building a website is no longer the challenge; maintaining speed and performance
 | 0 — Foundation | Auth, DB, Vercel deploy, CI | ✅ Done |
 | 1 — MVP | URL → audit → report, free tier | ✅ Done |
 | 2 — Pro | Stripe billing, scheduled monitoring, email alerts, history charts, AI action plans, SEO/A11y audits, multi-page scanning, CrUX 25-week data | ✅ Done (needs env vars in prod) |
-| 3 — Agency | PDF reports, white-label, multi-user teams | Planned |
+| 3 — Agency | PDF reports, white-label, multi-user teams | ✅ Done (needs BLOB_READ_WRITE_TOKEN + Clerk Orgs enabled in dashboard) |
 | 4 — Growth | `/check` public analyzer, Slack alerts, embeddable badge | Planned |
 
 ---
@@ -62,7 +62,7 @@ Building a website is no longer the challenge; maintaining speed and performance
 - 100 projects, unlimited pages per project
 - Unlimited AI action plans — Claude Sonnet
 - White-label PDF reports (custom logo, color, footer)
-- Multi-user teams via Clerk Organizations (Phase 3)
+- Multi-user teams via Clerk Organizations
 - 1-year history
 
 ---
@@ -118,13 +118,15 @@ src/
 │   │   ├── dashboard/             # Project list
 │   │   ├── projects/[id]/         # Project detail, per-page tabs, audit history
 │   │   └── settings/              # Billing, alert thresholds
+│   │       └── branding-section.tsx   # Agency logo, color, contact form
 │   ├── (marketing)/               # Landing page (/)
 │   ├── share/[token]/             # Public read-only audit report
 │   └── api/
 │       ├── webhooks/stripe/       # Subscription lifecycle
 │       ├── webhooks/clerk/        # User sync to DB
+│       ├── upload/logo/          # Logo upload → Vercel Blob (or local dev fallback)
 │       ├── projects/[id]/audit/   # Manual audit trigger
-│       ├── projects/[id]/pdf/     # PDF generation + Vercel Blob upload
+│       ├── projects/[id]/reports/  # PDF generation + Vercel Blob upload + report history
 │       ├── cron/trigger-audits/   # Vercel Cron → QStash fan-out
 │       └── jobs/run-audit/        # QStash job handler
 ├── components/
@@ -138,11 +140,14 @@ src/
 │   │   ├── DiagnosticsGrid.tsx    # Resource breakdown: transfer size, blocking, image savings
 │   │   ├── ScoreHistoryChart.tsx  # Line chart + CrUX 25-week real-user toggle
 │   │   └── RunAuditButton.tsx     # Button with free-tier run counter
-│   └── projects/
-│       ├── PageTabs.tsx           # Sub-page navigation tabs
-│       ├── ScheduleSelector.tsx   # Daily / hourly monitoring toggle
-│       ├── AlertThresholds.tsx    # Per-project alert threshold config
-│       └── DownloadPDFButton.tsx  # PDF download (Studio + Agência)
+│   ├── projects/
+│   │   ├── PageTabs.tsx           # Sub-page navigation tabs
+│   │   ├── ScheduleSelector.tsx   # Daily / hourly monitoring toggle
+│   │   ├── AlertThresholds.tsx    # Per-project alert threshold config
+│   │   ├── DownloadPDFButton.tsx  # PDF download (Studio + Agência)
+│   │   └── ReportHistory.tsx      # Past PDF reports list with download links
+│   └── layout/
+│       └── org-switcher.tsx       # Clerk OrganizationSwitcher (Agency plan users only)
 ├── lib/
 │   ├── api/
 │   │   ├── pagespeed.ts           # PSI API client (all 4 Lighthouse categories)
@@ -156,7 +161,8 @@ src/
 │   │   ├── metrics.ts             # CWV thresholds, gradeMetric, GRADE_STYLES
 │   │   ├── plan-limits.ts         # PLAN_LIMITS per tier
 │   │   ├── explanations.ts        # Static action plan fallback
-│   │   └── schedule.ts            # nextNoonBRT, tomorrowNoonBRT
+│   │   ├── schedule.ts            # nextNoonBRT, tomorrowNoonBRT
+│   │   └── get-plan.ts            # Shared getUserPlan(userId) helper
 │   ├── alerts.ts                  # checkAndFireAlerts (threshold check + Resend)
 │   ├── audit-runner.ts            # runAuditForProject (shared: manual + cron)
 │   └── stripe.ts                  # Stripe client singleton
@@ -164,7 +170,8 @@ src/
 │   ├── projects.ts                # createProjectAction, deleteProjectAction
 │   ├── billing.ts                 # createCheckoutSession, createBillingPortalSession
 │   ├── alerts.ts                  # updateAlertThresholdsAction
-│   └── schedule.ts                # updateScheduleAction
+│   ├── schedule.ts                # updateScheduleAction
+│   └── branding.ts                # updateBrandingAction (Agency plan)
 ├── emails/
 │   └── alert-email.tsx            # React Email alert template
 ├── types/
@@ -223,6 +230,15 @@ STRIPE_PRO_PRICE_ID=price_...       # Studio R$199
 STRIPE_AGENCY_PRICE_ID=price_...    # Agência R$449
 RESEND_API_KEY=re_...
 ```
+
+Phase 3 features (PDF storage, white-label) also need:
+
+```env
+# Vercel Blob (PDF reports + logo uploads)
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...   # obtain via: vercel env pull
+```
+
+> **Note:** Without `BLOB_READ_WRITE_TOKEN`, logo uploads fall back to `public/uploads/` (local dev only) and PDFs stream as direct downloads without being saved.
 
 ### 3. Database Setup
 
@@ -299,6 +315,8 @@ Vercel Cron (hourly)
 - **`noUncheckedIndexedAccess: true`** — `array[0]` returns `T | undefined`; use optional chaining throughout
 - **Tailwind v4** — CSS-based config (`@import "tailwindcss"` in globals.css); no `tailwind.config.ts`
 - **Dashboard pages need `force-dynamic`** — `export const dynamic = "force-dynamic"` on every page that reads the Clerk session
+- **Logo URL must be absolute for PDF rendering** — `@react-pdf/renderer` fetches images server-side; relative `/uploads/…` URLs are converted to absolute using the request origin before being passed to `<AuditReportPDF>`
+- **Clerk Organizations must be enabled manually** — go to Clerk Dashboard → Settings → Organizations and enable it; the `OrganizationSwitcher` only appears for Agency plan users
 
 ---
 
@@ -311,6 +329,7 @@ Set all env vars in the Vercel dashboard, then wire:
 1. **Clerk webhook** → `https://your-domain.com/api/webhooks/clerk` (events: `user.created`, `user.deleted`)
 2. **Stripe webhook** → `https://your-domain.com/api/webhooks/stripe` (events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`)
 3. **CrUX History API** → enable "Chrome UX Report API" in Google Cloud Console (same key as PSI)
+4. **Vercel Blob** → create a Blob store in your project's Storage tab; `BLOB_READ_WRITE_TOKEN` is added automatically
 
 ---
 
