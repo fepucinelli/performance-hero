@@ -4,7 +4,7 @@ export interface UrlValidation {
   normalized?: string // lowercase, trailing-slash-stripped
 }
 
-const PRIVATE_RANGES = [
+const PRIVATE_PREFIXES = [
   "localhost",
   "127.",
   "0.",
@@ -27,7 +27,18 @@ const PRIVATE_RANGES = [
   "172.30.",
   "172.31.",
   "::1",
+  // Link-local — covers AWS/GCP metadata endpoint (169.254.169.254)
+  "169.254.",
 ]
+
+/** Returns true if hostname is in the RFC 6598 shared/CGNAT range (100.64.0.0/10). */
+function isCgnatAddress(hostname: string): boolean {
+  const parts = hostname.split(".")
+  if (parts.length < 2) return false
+  const first = Number(parts[0])
+  const second = Number(parts[1])
+  return first === 100 && second >= 64 && second <= 127
+}
 
 export function validateAuditUrl(rawUrl: string): UrlValidation {
   const trimmed = rawUrl.trim()
@@ -55,10 +66,11 @@ export function validateAuditUrl(rawUrl: string): UrlValidation {
     return { valid: false, error: "URL must use http or https" }
   }
 
+  const hostname = url.hostname
+
   if (
-    PRIVATE_RANGES.some(
-      (r) => url.hostname === r || url.hostname.startsWith(r)
-    )
+    PRIVATE_PREFIXES.some((r) => hostname === r || hostname.startsWith(r)) ||
+    isCgnatAddress(hostname)
   ) {
     return {
       valid: false,
@@ -66,7 +78,7 @@ export function validateAuditUrl(rawUrl: string): UrlValidation {
     }
   }
 
-  if (!url.hostname.includes(".")) {
+  if (!hostname.includes(".")) {
     return { valid: false, error: "Please enter a full domain (e.g. yoursite.com)" }
   }
 
