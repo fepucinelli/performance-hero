@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Globe, BookOpen, ListChecks, Bell, Search } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "PerfAlly — Auditorias profissionais de performance e SEO para desenvolvedores",
+  title: "PerfAlly — Auditorias profissionais de performance e SEO",
 }
 
 // Static metric examples for the hero section — intentionally a bad site
@@ -62,10 +62,10 @@ export default function HomePage() {
         </h1>
 
         <p className="text-muted-foreground mx-auto mb-2 max-w-xl text-lg">
-          Monitore os sites dos seus clientes. Gere relatórios impressionantes. Cobre como especialista.
+          Monitore os sites dos seus clientes. Gere relatórios impressionantes.
         </p>
         <p className="text-muted-foreground mx-auto mb-8 max-w-lg text-sm">
-          Você paga R$89/mês. Seus clientes te pagam R$300–1.000/mês por monitoramento.
+          Criar um site já não é mais o desafio; manter velocidade e performance em escala é que faz a diferença.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -109,7 +109,7 @@ export default function HomePage() {
       <section className="bg-muted/30 border-t py-16">
         <div className="mx-auto max-w-5xl px-4">
           <h2 className="mb-10 text-center text-2xl font-semibold tracking-tight">
-            Tudo que você precisa para vender consultoria de performance
+            Tudo que você precisa para consultoria de performance
           </h2>
           <div className="grid gap-6 sm:grid-cols-2">
             {features.map((f) => (

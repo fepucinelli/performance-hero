@@ -14,7 +14,7 @@
 
 PerfAlly runs PageSpeed Insights audits on your clients' sites and turns raw Lighthouse data into something you can actually deliver — a Site Health score, failing SEO/accessibility items labeled in plain Portuguese, AI-generated action plans with concrete implementation steps, and 25 weeks of real-user trend data.
 
-You pay R$89–449/mês. You bill your clients R$300–1.000/mês for monitoring. The margin is the product.
+Building a website is no longer the challenge; maintaining speed and performance at scale is.
 
 ---
 

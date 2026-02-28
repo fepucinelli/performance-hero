@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | PerfAlly",
   },
   description:
-    "Core Web Vitals monitoring for founders, not engineers. Plain-English reports with a prioritized action plan.",
+    "Building a website is no longer the challenge; maintaining speed and performance at scale is. Plain-English reports with a prioritized action plan.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
