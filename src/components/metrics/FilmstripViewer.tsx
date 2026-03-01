@@ -138,7 +138,7 @@ export function FilmstripViewer({ lighthouseRaw, lcp, fcp }: FilmstripViewerProp
       </div>
 
       {/* Frame strip */}
-      <div className="flex gap-2 overflow-x-auto px-1 py-1.5">
+      <div className="flex gap-2 overflow-x-auto overscroll-x-contain px-1 py-1.5">
         {frames.map((frame, i) => (
           <button
             key={i}
