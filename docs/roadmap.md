@@ -240,11 +240,11 @@ and referrals.
 
 ## Phase 5 — Scale
 
-**Goal:** Build the developer ecosystem around PerfAlly.
+**Goal:** Build the developer ecosystem around Performance Hero.
 
 - [ ] Public REST API (API key management, `POST /v1/audits`,
       `GET /v1/projects`)
-- [ ] GitHub Action (`perf-ally/audit-action` — posts a score diff comment on
+- [ ] GitHub Action (`performance-hero/audit-action` — posts a score diff comment on
       PRs)
 - [ ] WordPress plugin (auto-register site, dashboard widget)
 - [ ] Zapier / Make integration

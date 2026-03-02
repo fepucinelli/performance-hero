@@ -1,4 +1,4 @@
-# PerfAlly development guide
+# Performance Hero development guide
 
 **Project:** SaaS web performance and SEO audit platform
 **Current phase:** Phase 3 complete — Phases 0–3 shipped

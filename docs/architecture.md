@@ -389,7 +389,7 @@ latency.
 ## Vercel deployment
 
 ```
-main branch      → production (perf-ally.com)
+main branch      → production (performance-hero.com)
 preview branches → preview URLs (auto, per PR)
 ```
 
