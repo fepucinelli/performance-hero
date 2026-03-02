@@ -116,7 +116,13 @@ export async function POST(
               accentColor: dbUser?.agencyAccentColor ?? null,
               agencyLogoUrl: absoluteUrl(dbUser?.agencyLogoUrl, origin),
             }
-          : null
+          : {
+              agencyLogoUrl: absoluteUrl("/favicon.png", origin),
+              agencyName: "Performance Hero",
+              agencyContact: null,
+              accentColor: null,
+              logoWidth: 40,
+            }
       }
     />
   )

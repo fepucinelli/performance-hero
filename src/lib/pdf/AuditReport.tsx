@@ -51,6 +51,8 @@ interface Branding {
   agencyName?: string | null
   agencyContact?: string | null
   agencyLogoUrl?: string | null
+  /** Width in PDF points. Defaults to 80 (agency wordmarks). Use 40 for square icons. */
+  logoWidth?: number
 }
 
 export interface ReportProps {
@@ -495,7 +497,7 @@ function ProjectCoverPage({
         // eslint-disable-next-line jsx-a11y/alt-text
         <Image
           src={branding.agencyLogoUrl}
-          style={{ width: 80, marginBottom: 8 }}
+          style={{ width: branding.logoWidth ?? 80, marginBottom: 8 }}
         />
       )}
       {branding?.agencyName && (
@@ -719,7 +721,7 @@ function CoverSummaryPage({
         // eslint-disable-next-line jsx-a11y/alt-text
         <Image
           src={branding.agencyLogoUrl}
-          style={{ width: 80, marginBottom: 8 }}
+          style={{ width: branding.logoWidth ?? 80, marginBottom: 8 }}
         />
       )}
       {branding?.agencyName && (
