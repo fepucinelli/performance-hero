@@ -17,6 +17,7 @@ import { SiteHealthCard } from "@/components/metrics/SiteHealthCard"
 import { RunAuditButton } from "@/components/metrics/RunAuditButton"
 import { ChevronLeft, Share2, Globe } from "lucide-react"
 import { DownloadPDFButton } from "@/components/projects/DownloadPDFButton"
+import { DeleteProjectButton } from "@/components/projects/DeleteProjectButton"
 import { ReportHistory } from "@/components/projects/ReportHistory"
 import { ScoreHistoryChart } from "@/components/metrics/ScoreHistoryChart"
 import { DiagnosticsGrid } from "@/components/metrics/DiagnosticsGrid"
@@ -193,6 +194,7 @@ export default async function ProjectPage({
           </div>
         </div>
         <div className="flex items-start gap-2">
+          <DeleteProjectButton projectId={project.id} projectName={project.name} />
           <DownloadPDFButton
             projectId={project.id}
             canGeneratePDF={planLimits.pdfReports}
