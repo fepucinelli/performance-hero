@@ -36,6 +36,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# AI prompts — prompts.example.ts IS committed, prompts.ts is NOT
+src/lib/ai/prompts.ts
+
 # vercel
 .vercel
 

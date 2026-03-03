@@ -12,6 +12,7 @@ import Anthropic from "@anthropic-ai/sdk"
 import { env } from "@/env"
 import type { AIActionItem } from "@/types"
 import type { LighthouseResult } from "@/types"
+import { getSystemPrompt, buildUserPrompt } from "./prompts"
 
 let _client: Anthropic | null = null
 
@@ -60,16 +61,6 @@ interface AuditDetail {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatMs(ms: number | null): string {
-  if (ms === null) return "N/A"
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
-}
-
-function formatCls(cls: number | null): string {
-  if (cls === null) return "N/A"
-  return cls.toFixed(3)
-}
 
 function formatKB(bytes: number): string {
   return bytes >= 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${bytes} B`
@@ -218,64 +209,8 @@ export async function generateAIActionPlan(
       ? seoAudits.map(formatAuditBlock).join("\n")
       : "Nenhum problema crítico de SEO detectado."
 
-  const systemPrompt = `Você é um especialista sênior em performance web e SEO técnico.
-Sua tarefa é gerar um plano de ação altamente específico e acionável para um desenvolvedor.
-
-Regras absolutas:
-- SEMPRE cite os arquivos, URLs e recursos reais fornecidos nos dados do audit
-- NUNCA dê conselhos genéricos como "otimize suas imagens" sem especificar quais
-- Cada passo deve ser algo que o desenvolvedor pode executar agora
-- Inclua comandos, configurações ou trechos de código quando relevante
-- Escreva em português brasileiro, linguagem técnica e direta
-- FORMATAÇÃO: envolva qualquer nome de arquivo, função, propriedade, comando ou trecho de código em backticks (\`assim\`). Exemplos: \`next.config.js\`, \`loading="lazy"\`, \`window.addEventListener\`, \`npm run build\``
-
-  const userPrompt = `Analise os dados de performance abaixo e gere um plano de ação preciso e acionável.
-
-URL auditada: ${url}
-Stack detectada: ${stackPacks}
-
-SCORES:
-- Performance: ${metrics.perfScore ?? "N/A"}/100
-- SEO: ${metrics.seoScore ?? "N/A"}/100 (meta: 90+)
-- Acessibilidade: ${metrics.accessibilityScore ?? "N/A"}/100 (meta: 90+)
-
-CORE WEB VITALS:
-- LCP: ${formatMs(metrics.lcp)} (meta: < 2,5s)
-- INP: ${formatMs(metrics.cruxInp)} (meta: < 200ms)
-- CLS: ${formatCls(metrics.cls)} (meta: < 0,1)
-- FCP: ${formatMs(metrics.fcp)} (meta: < 1,8s)
-- TTFB: ${formatMs(metrics.ttfb)} (meta: < 800ms)
-
-AUDITS DE PERFORMANCE COM PROBLEMAS (com recursos específicos):
-${perfBlock}
-
-AUDITS DE SEO COM PROBLEMAS:
-${seoBlock}
-
-INSTRUÇÕES:
-- Gere entre 4 e 6 recomendações priorizadas por maior impacto
-- Para cada recomendação, inclua "steps": array com 3 a 5 passos concretos de implementação
-  - Os steps devem referenciar arquivos/URLs reais dos dados acima quando disponíveis
-  - Podem incluir comandos de terminal, configurações ou trechos de código curtos
-  - Use backticks para qualquer código inline: ex. "Adicione \`loading=\\"lazy\\"\` na tag \`<img>\`"
-- O campo "action" deve resumir o problema e a solução em até 2 frases; use backticks para termos técnicos
-- Se a stack foi detectada (ex: Next.js, WordPress), inclua stackTip com instrução específica e use backticks para nomes de arquivos/propriedades
-
-Retorne APENAS um array JSON válido sem markdown, sem texto extra:
-[
-  {
-    "title": "Título curto e direto (máximo 8 palavras)",
-    "action": "Resumo do problema e solução — máximo 2 frases diretas",
-    "steps": [
-      "Passo 1 concreto — pode incluir comando ou código",
-      "Passo 2 concreto",
-      "Passo 3 concreto"
-    ],
-    "why": "Impacto mensurável para o negócio ou SEO — máximo 1 frase",
-    "difficulty": "Fácil|Médio|Difícil",
-    "stackTip": "Instrução específica para ${stackPacks !== "não detectado" ? stackPacks : "a stack detectada"} (omitir se stack não identificada)"
-  }
-]`
+  const systemPrompt = getSystemPrompt()
+  const userPrompt = buildUserPrompt({ url, stackPacks, metrics, perfBlock, seoBlock })
 
   try {
     const message = await client.messages.create({
